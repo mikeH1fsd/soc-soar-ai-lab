@@ -64,7 +64,7 @@ flowchart TD
     G1 -->|Structured JSON| J3
     J2 -->|Authorize Containment| S1
     S1 -->|REST API PUT| W1
-    W1 -->|remove-threat0| R1
+    W1 -->|remove-threat.cmd| R1
     W1 -->|!firewall-drop| R2
 ```
 
@@ -76,9 +76,9 @@ This repository adopts a modular **Hub & Spoke** documentation architecture. Cli
 
 | Playbook | Threat Vector & Scope | Technology Stack | Detailed Case Study |
 | :--- | :--- | :--- | :---: |
-| **Playbook 1: OS Credential Dumping & AI SOC Triage** | In-memory LSASS extraction via Sysinternals ProcDump (Atomic Red Team T1003.001). Sysmon Event ID 10 detection (`0x1fffff`), Level 12 SIEM correlation, automated 2-Pane Jira ticketing, and Google Gemini AI incident triage. | Atomic Red Team, Sysmon, Wazuh SIEM, Shuffle SOAR, Jira Cloud, Google Gemini | 👉 **[📖 Read Case Study (14 Screenshots: TP vs FP)](docs/playbooks/playbook_1_lsass_dump_defense.md)** |
-| **Playbook 2: Network Reconnaissance Defense** | Aggressive stealth Nmap SYN scanning against production web server. Snort NIDS detection, Level 12 SIEM correlation, and dynamic IPTables isolation. | Snort 2.9, Wazuh SIEM, Shuffle SOAR, Jira Cloud, IPTables | 👉 **[📖 Read Case Study (11 Screenshots)](docs/playbooks/playbook_2_nmap_defense.md)** |
-| **Playbook 3: Interactive AI SOC Triage Copilot** | On-demand LLM incident triage directly inside Jira. Zero-hallucination prompting, technical verdict reasoning, MITRE mapping, and color-coded ADF callout panels in < 3s. | Google Gemini Flash, Shuffle Python, Jira Cloud REST API v3 | 👉 **[📖 Read Case Study & Prompts](docs/playbooks/playbook_1_lsass_dump_defense.md#step-7-expert-ai-triage-verdict--remediation-guidance)** |
+| **Playbook 1: OS Credential Dumping & AI Triage** | In-memory LSASS extraction via ProcDump (Atomic Red Team T1003.001). Sysmon Event ID 10 (`0x1fffff`), True Positive vs False Positive (`0x1410`) discrimination, and 6-step IR checklist. | Atomic Red Team, Sysmon, Wazuh SIEM, Shuffle SOAR, Jira Cloud, Google Gemini | 👉 **[📖 Read Case Study (14 Screenshots)](docs/playbooks/playbook_1_lsass_dump_defense.md)** |
+| **Playbook 2: Network Reconnaissance Defense** | Aggressive stealth Nmap SYN scanning against web server. Snort NIDS detection, Level 12 SIEM correlation, 1-click authorization, and dynamic IPTables isolation (100% loss proof). | Snort 2.9, Wazuh SIEM, Shuffle SOAR, Jira Cloud, Linux IPTables | 👉 **[📖 Read Case Study (11 Screenshots)](docs/playbooks/playbook_2_nmap_defense.md)** |
+| **Playbook 3: Endpoint Malware Containment (FIM)** | Real-time Trojan drop in Downloads (`lesson29.exe`). Wazuh FIM detection, VirusTotal CTI (30/71 engines), Google Gemini AI triage, and 1-click active response file deletion. | Wazuh Realtime FIM, VirusTotal API, Shuffle SOAR, Jira Cloud, Active Response | 👉 **[📖 Read Case Study (15 Screenshots: Attack vs Benign Gatekeeper)](docs/playbooks/playbook_3_malware_containment_fim.md)** |
 
 ---
 
@@ -105,7 +105,8 @@ soc-soar-ai-lab/
 │   │   └── 09_kali_ping_100_percent_loss.png
 │   └── playbooks/                             # Modular playbook documentation
 │       ├── playbook_1_lsass_dump_defense.md   # Full case study: LSASS credential dumping & AI triage
-│       └── playbook_2_nmap_defense.md         # Full case study: Nmap defense & dynamic firewalling
+│       ├── playbook_2_nmap_defense.md         # Full case study: Nmap defense & dynamic firewalling
+│       └── playbook_3_malware_containment_fim.md # Full case study: FIM malware detection & 1-click deletion
 ├── configs/                                   # Production-ready detection configurations
 │   ├── wazuh/                                 # Custom correlation rules & webhook integrations
 │   │   ├── local_rules.xml
