@@ -1,0 +1,4 @@
+# Snort Custom Rules for Nmap Stealth Port Scan Detection
+# Path: /etc/snort/rules/local.rules
+
+alert tcp any any -> any any (msg:"Nmap SYN Scan Detected (Custom)"; flags:S; threshold: type both, track by_src, count 100, seconds 5; classtype:attempted-recon; sid:1000005; rev:3;)

@@ -1,0 +1,17 @@
+<!-- Sysmon Configuration for SOC Lab Telemetry -->
+<Sysmon schemaversion="4.90">
+  <EventFiltering>
+    <!-- Event ID 11: FileCreate (Detect dropping files in Public/Downloads) -->
+    <RuleGroup name="FileCreation" groupRelation="or">
+      <FileCreate onmatch="include">
+        <TargetFilename condition="contains">C:\Users\Public\Downloads</TargetFilename>
+      </FileCreate>
+    </RuleGroup>
+    <!-- Event ID 10: ProcessAccess (Detect LSASS access / Credential dumping) -->
+    <RuleGroup name="LSASSAccess" groupRelation="or">
+      <ProcessAccess onmatch="include">
+        <TargetImage condition="end with">lsass.exe</TargetImage>
+      </ProcessAccess>
+    </RuleGroup>
+  </EventFiltering>
+</Sysmon>

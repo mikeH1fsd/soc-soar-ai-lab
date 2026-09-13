@@ -1,0 +1,33 @@
+<!-- Wazuh Custom Detection Rules for SOAR Automation Lab -->
+<!-- Path on Manager: /var/ossec/etc/rules/local_rules.xml -->
+
+<group name="local,soc_lab,">
+
+  <!-- ============================================================ -->
+  <!-- PLAYBOOK 1: ENDPOINT MALWARE DETECTION & CONTAINMENT        -->
+  <!-- ============================================================ -->
+  <rule id="100055" level="12">
+    <if_sid>550,554</if_sid>
+    <match>C:\Users\Public\Downloads</match>
+    <description>SOC ALERT: Potential Malware Dropped in Public Downloads Directory</description>
+    <mitre>
+      <id>T1204.002</id>
+      <tactic>TA0002</tactic>
+    </mitre>
+  </rule>
+
+  <!-- ============================================================ -->
+  <!-- PLAYBOOK 2: NETWORK RECONNAISSANCE DEFENSE (NMAP SYN SCAN)  -->
+  <!-- ============================================================ -->
+  <rule id="100002" level="12">
+    <if_group>ids</if_group>
+    <match>Nmap SYN Scan Detected</match>
+    <description>CRITICAL ALERT: Reconnaissance - Nmap SYN Port Scan Detected by Snort IDS</description>
+    <mitre>
+      <id>T1046</id>
+      <id>T1595.002</id>
+      <tactic>TA0043</tactic>
+    </mitre>
+  </rule>
+
+</group>
