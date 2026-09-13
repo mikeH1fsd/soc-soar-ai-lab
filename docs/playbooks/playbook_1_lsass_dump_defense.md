@@ -29,12 +29,12 @@ This case study demonstrates an end-to-end investigation pipeline for **MITRE AT
 | Attribute | Case A: True Positive (Attack) | Case B: False Positive (Benign) |
 | :--- | :--- | :--- |
 | **Jira Ticket** | **SA-76** | **SA-77** |
-| **Source Image** | `C:\AtomicRedTeam\ExternalPayloads\procdump64.exe` | `C:\Program Files (x86)\ossec-agent\wazuh-agent.exe` |
-| **Target Image** | `C:\Windows\system32\lsass.exe` | `C:\Windows\system32\lsass.exe` |
-| **Granted Access** | **`0x1fffff` (`PROCESS_ALL_ACCESS`)** | **`0x1410` (`PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_VM_READ`)** |
+| **Source Image** | `procdump64.exe`<br/>*(C:\AtomicRedTeam\ExternalPayloads\)* | `wazuh-agent.exe`<br/>*(C:\Program Files (x86)\ossec-agent\)* |
+| **Target Image** | `lsass.exe`<br/>*(C:\Windows\system32\)* | `lsass.exe`<br/>*(C:\Windows\system32\)* |
+| **Granted Access** | `0x1fffff` (PROCESS_ALL_ACCESS) | `0x1410` (QUERY_LIMITED + VM_READ) |
 | **User Account** | `DESKTOP-LC5KHD6\SONY` (Interactive User) | `NT AUTHORITY\SYSTEM` (System Service) |
 | **Call Stack Trace** | `ntdll.dll` -> `KERNELBASE.dll` | `sysinfo.dll` -> `syscollector.dll` -> `wow64.dll` |
-| **Gemini Verdict** | 🛑 **`[TRUE_POSITIVE | Mức độ: KHẨN CẤP]`** (Red Panel) | ✅ **`[FALSE_POSITIVE | Mức độ: THAP]`** (Green Panel) |
+| **Gemini Verdict** | 🛑 `[TRUE_POSITIVE - Mức độ: KHẨN CẤP]` (Red Panel) | ✅ `[FALSE_POSITIVE - Mức độ: THẤP]` (Green Panel) |
 | **Remediation Action**| Network host isolation, memory acquisition, credential reset | Whitelist in SIEM correlation rule, close ticket |
 
 ---
