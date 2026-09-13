@@ -34,7 +34,7 @@ flowchart TD
 
     subgraph SOAR["🔀 Automation & Orchestration (Shuffle)"]
         S1["Shuffle Webhooks"]
-        S2["Python Sanitization & Data Normalization"]
+        S2["Python Normalization & ADF Packaging"]
         S3["VirusTotal CTI Enrichment"]
     end
 
@@ -53,7 +53,7 @@ flowchart TD
         R2["Wazuh Active Response<br/>(Dynamic IPTables Firewall Drop)"]
     end
 
-    A1 -->|Syscheck / File Drop| W1
+    A1 -->|File Drop Alert| W1
     A2 -->|Nmap SYN Scan Alert| W1
     W1 -->|JSON Webhook| S1
     S1 --> S3
@@ -70,59 +70,24 @@ flowchart TD
 
 ---
 
-## 🚀 Key Incident Response Playbooks
+## 🚀 Incident Response Playbooks (Documentation Hub)
 
-### Playbook 1: Endpoint Malware Detection & Containment
-* **Attack Scenario:** A malicious executable (`eicar.com` / `mimikatz.exe`) is downloaded to `C:\Users\Public\Downloads`.
-* **Detection:** Wazuh File Integrity Monitoring (FIM) detects file creation (Rule `100055`, Level 12).
-* **SOAR Workflow:**
-  1. Wazuh forwards alert to Shuffle via Webhook.
-  2. Shuffle queries **VirusTotal API** for file reputation.
-  3. Formats alert into an **Atlassian Document Format (ADF) 2-Pane Incident Ticket**:
-     - **Pane 1:** High-level summary, host context, and remediation action banner.
-     - **Pane 2:** Comprehensive technical telemetry dump for deep analysis.
-  4. Analyst clicks **⚡ [☢️ APPROVE MALWARE DELETION]**.
-  5. Shuffle invokes Wazuh REST API (`remove-threat0`), which executes a native PowerShell script on Windows to remove the malicious binary.
-  6. Automated confirmation comment is posted back to Jira.
+This repository adopts a modular **Hub & Spoke** documentation architecture. Click on each playbook card below to read the comprehensive technical case study, step-by-step screenshots, and evidence trails:
+
+| Playbook | Threat Vector & Scope | Technology Stack | Detailed Case Study |
+| :--- | :--- | :--- | :---: |
+| **Playbook 1: OS Credential Dumping & AI SOC Triage** | In-memory LSASS extraction via Sysinternals ProcDump (Atomic Red Team T1003.001). Sysmon Event ID 10 detection (`0x1fffff`), Level 12 SIEM correlation, automated 2-Pane Jira ticketing, and Google Gemini AI incident triage. | Atomic Red Team, Sysmon, Wazuh SIEM, Shuffle SOAR, Jira Cloud, Google Gemini | 👉 **[📖 Read Case Study (14 Screenshots: TP vs FP)](docs/playbooks/playbook_1_lsass_dump_defense.md)** |
+| **Playbook 2: Network Reconnaissance Defense** | Aggressive stealth Nmap SYN scanning against production web server. Snort NIDS detection, Level 12 SIEM correlation, and dynamic IPTables isolation. | Snort 2.9, Wazuh SIEM, Shuffle SOAR, Jira Cloud, IPTables | 👉 **[📖 Read Case Study (11 Screenshots)](docs/playbooks/playbook_2_nmap_defense.md)** |
+| **Playbook 3: Interactive AI SOC Triage Copilot** | On-demand LLM incident triage directly inside Jira. Zero-hallucination prompting, technical verdict reasoning, MITRE mapping, and color-coded ADF callout panels in < 3s. | Google Gemini Flash, Shuffle Python, Jira Cloud REST API v3 | 👉 **[📖 Read Case Study & Prompts](docs/playbooks/playbook_1_lsass_dump_defense.md#step-7-expert-ai-triage-verdict--remediation-guidance)** |
 
 ---
 
-### Playbook 2: Network Reconnaissance & Dynamic Firewalling
-* **Attack Scenario:** Attacker machine (Kali Linux) executes an aggressive stealth SYN port scan (`nmap -sS -p 1-1000 --min-rate 1000`) against the web server.
-* **Detection:** **Snort IDS** detects threshold-breaking SYN packets without ACK (`local.rules`, SID `1000005`). Wazuh Agent captures log and triggers Rule `100002` (Level 12).
-* **SOAR Workflow:**
-  1. Shuffle extracts Attacker IP (`192.168.109.165`) and target telemetry.
-  2. Jira ticket is automatically populated with packet details and MITRE mapping (`T1595.002`).
-  3. SOC Analyst reviews alert and authorizes blocking via Jira manual trigger.
-  4. Shuffle calls Wazuh REST API with `command: !firewall-drop`.
-  5. Wazuh Agent dynamically inserts `iptables -I INPUT -s <Attacker_IP> -j DROP`.
-  6. Subsequent attacker probes are completely dropped (`100% packet loss`).
+## 📸 Key Visual Proof of Work
 
----
-
-### Playbook 3: On-Demand AI Incident Triage Copilot (Google Gemini)
-* **Problem:** In complex alerts, junior analysts may struggle to correlate packet flags, MITRE techniques, and attack intent in under 60 seconds.
-* **Solution:** An **interactive AI Copilot** embedded directly into Jira:
-  1. Analyst clicks **`🤖 Hỏi AI SOC`** directly on any Jira alert ticket.
-  2. Jira Automation dispatches ticket summary and raw telemetry to Shuffle.
-  3. **Zero-Hallucination Prompting Engine:** The Python node wraps telemetry into an 8-rule strict prompt (banning fabricated IOCs, forcing evidence-based reasoning, and bounding intent strictly to observed data).
-  4. **Google Gemini Flash** analyzes telemetry and outputs strict JSON:
-     - `verdict`: `TRUE_POSITIVE` | `FALSE_POSITIVE` | `SUSPICIOUS`
-     - `verdict_reasoning`: Technical justification based on TCP flags/ports.
-     - `mitre_technique`: Verified MITRE technique ID and name.
-     - `attacker_intent`: Probable objective and next staging step.
-     - `remediation_actions`: 3-4 prioritized response actions.
-  5. Shuffle converts JSON into an Atlassian ADF Callout Panel (Color-coded: 🔴 **Error/Red** for Critical/High, 🟡 **Warning/Yellow** for Suspicious, 🟢 **Success/Green** for False Positive) and posts it as an incident comment in **under 3 seconds**.
-
----
-
-## 📸 Proof of Work & Verification
-
-| Component | Screenshot & Description |
-| :--- | :--- |
-| **Interactive AI Triage in Jira** | ![AI SOC Triage](docs/pb3_ai_soc_triage.png)<br/>*Rich ADF Callout Panel automatically generated by Google Gemini inside Jira Ticket.* |
-| **2-Pane Jira Ticket Architecture** | *Pane 1 (Actionable metadata & 1-click button) + Pane 2 (Full technical log telemetry).* |
-| **Active Response Verification** | *Linux `iptables -L -n` showing attacker IP in `DROP` chain with 100% packet drop.* |
+| Interactive AI Triage (Google Gemini in Jira) | Containment Verification (100% Packet Loss) |
+| :---: | :---: |
+| ![AI SOC Triage](docs/images/07_gemini_ai_comment.png) | ![Containment Verification](docs/images/09_kali_ping_100_percent_loss.png) |
+| *Structured ADF Callout Panel generated by Gemini in Jira.* | *Kali ICMP packets dropped: 60 sent, 0 received, 100% packet loss.* |
 
 ---
 
@@ -130,25 +95,33 @@ flowchart TD
 
 ```text
 soc-soar-ai-lab/
-├── README.md                          # Project documentation and architectural overview
-├── docs/                              # Screenshots and visual proof of work
-│   └── pb3_ai_soc_triage.png          # Live Jira AI Triage comment screenshot
-├── configs/                           # Detection & SIEM configuration files
-│   ├── wazuh/                         # Custom Wazuh rules & integration hooks
+├── README.md                                  # Landing page & architectural overview (You are here)
+├── docs/
+│   ├── images/                                # High-resolution screenshots and proof-of-work
+│   │   ├── 00_wazuh_before_no_alerts.png
+│   │   ├── 02_nmap_scan_attack.png
+│   │   ├── 05_jira_ticket_pane1.png
+│   │   ├── 07_gemini_ai_comment.png
+│   │   └── 09_kali_ping_100_percent_loss.png
+│   └── playbooks/                             # Modular playbook documentation
+│       ├── playbook_1_lsass_dump_defense.md   # Full case study: LSASS credential dumping & AI triage
+│       └── playbook_2_nmap_defense.md         # Full case study: Nmap defense & dynamic firewalling
+├── configs/                                   # Production-ready detection configurations
+│   ├── wazuh/                                 # Custom correlation rules & webhook integrations
 │   │   ├── local_rules.xml
 │   │   └── ossec_integration.xml
-│   ├── snort/                         # Snort NIDS detection rules
+│   ├── snort/                                 # Snort 2.9 thresholding rules
 │   │   └── local.rules
-│   └── sysmon/                        # Windows Sysmon configuration
+│   └── sysmon/                                # Windows Sysmon event filtering
 │       └── sysmonconfig.xml
-├── scripts/                           # Host-based Active Response scripts
+├── scripts/                                   # Host-level Active Response & utility scripts
 │   ├── active_response/
-│   │   ├── remove-threat.cmd          # Windows PowerShell file deletion wrapper
-│   │   └── firewall-drop.sh           # Linux IPTables dynamic rule insertion
+│   │   ├── remove-threat.cmd                  # Windows PowerShell file deletion wrapper
+│   │   └── firewall-drop.sh                   # Linux IPTables dynamic isolation wrapper
 │   └── helpers/
-│       └── gemini_prompt_builder.py   # Python string escaping & JSON sanitization
-└── prompts/                           # System prompts for Generative AI
-    └── soc_analyst_l3_prompt.md       # 8-Rule Zero-Hallucination Prompt Framework
+│       └── gemini_prompt_builder.py           # Python string escaping & JSON sanitization
+└── prompts/                                   # Enterprise Generative AI prompts
+    └── soc_analyst_l3_prompt.md               # 8-Rule Zero-Hallucination Prompt Framework
 ```
 
 ---
@@ -156,10 +129,9 @@ soc-soar-ai-lab/
 ## 🧠 Key Technical Challenges Solved
 
 1. **Jira Cloud REST API v3 ADF Conformance:**
-   - Jira Cloud v3 rejects plain-text strings in comments and descriptions, requiring deep Atlassian Document Format (`type: "doc"`). Solved by building an automated ADF JSON builder in Python handling nested panels, marks, and bullet lists.
+   - Handled Atlassian's strict nested document schema (`type: "doc"`) for both incident tickets and rich color-coded comments without using brittle HTML.
 2. **Preventing LLM Prompt Injection & JSON Breaking:**
-   - Raw IDS and system logs contain unescaped double quotes, backslashes, and arbitrary newlines that easily break downstream HTTP payloads. Solved with a dedicated regex sanitizer (`.replace('\', '\\').replace('"', "'").replace('
-', '\n')`).
+   - Raw IDS and system logs contain unescaped double quotes, backslashes, and arbitrary newlines that easily break downstream HTTP payloads. Solved with a dedicated regex sanitizer (`.replace('\\', '\\\\').replace('"', "'").replace('\n', '\\n')`).
 3. **HTTP 406 Not Acceptable & Content Negotiation:**
    - Overcame Atlassian v3 gateway rejections by strictly enforcing `Accept: application/json` and `Content-Type: application/json` headers within SOAR HTTP modules.
 4. **Snort Alert Cooldown & Threshold Tuning:**

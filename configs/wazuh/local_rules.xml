@@ -4,8 +4,22 @@
 <group name="local,soc_lab,">
 
   <!-- ============================================================ -->
-  <!-- PLAYBOOK 1: ENDPOINT MALWARE DETECTION & CONTAINMENT        -->
+  <!-- PLAYBOOK 1: OS CREDENTIAL DUMPING (LSASS PROCESS ACCESS)    -->
   <!-- ============================================================ -->
+  <rule id="100200" level="12">
+    <if_group>sysmon_eid10_detections|sysmon</if_group>
+    <field name="win.eventdata.targetImage">lsass.exe</field>
+    <description>Suspicious Process Access: '$(win.eventdata.sourceImage)' accessed '$(win.eventdata.targetImage)'</description>
+    <mitre>
+      <id>T1003.001</id>
+      <id>T1055</id>
+      <tactic>TA0006</tactic>
+      <tactic>TA0005</tactic>
+      <tactic>TA0004</tactic>
+    </mitre>
+  </rule>
+
+  <!-- Optional FIM Rule for Malicious Drops -->
   <rule id="100055" level="12">
     <if_sid>550,554</if_sid>
     <match>C:\Users\Public\Downloads</match>
