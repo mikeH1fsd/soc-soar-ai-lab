@@ -1,0 +1,51 @@
+# ==============================================================================
+# SOC & Security Automation Lab - .gitignore
+# ==============================================================================
+
+# Environment Variables & Secrets (CRITICAL)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.pfx
+*.p12
+id_rsa
+id_rsa.pub
+
+# Python Artifacts & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.pytest_cache/
+
+# Operating System & Editor Files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs and Runtime Dumps
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# Temporary and Scratch Dumps
+scratch/
+tmp/
+*.tmp

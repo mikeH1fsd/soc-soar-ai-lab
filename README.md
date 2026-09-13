@@ -6,6 +6,7 @@
 [![Google Gemini](https://img.shields.io/badge/AI%20Copilot-Google%20Gemini%20Flash-8E75C2?style=for-the-badge&logo=googlegemini)](https://ai.google.dev/)
 [![Snort](https://img.shields.io/badge/NIDS-Snort%202.9-red?style=for-the-badge)](https://www.snort.org/)
 [![MITRE ATT&CK](https://img.shields.io/badge/Framework-MITRE%20ATT%26CK-black?style=for-the-badge)](https://attack.mitre.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
 ---
 
@@ -29,7 +30,7 @@ flowchart TD
     end
 
     subgraph SIEM["🛡️ SIEM Core"]
-        W1["Wazuh Manager<br/>(Correlation Rules 100055 & 100002)"]
+        W1["Wazuh Manager<br/>(Correlation Rules 100055, 100002 & 100200)"]
     end
 
     subgraph SOAR["🔀 Automation & Orchestration (Shuffle)"]
@@ -82,6 +83,17 @@ This repository adopts a modular **Hub & Spoke** documentation architecture. Cli
 
 ---
 
+## 📚 Technical Reference Guides & Artifacts
+
+| Component | Description | Reference Link |
+| :--- | :--- | :---: |
+| **Shuffle SOAR Workflows** | 5 production JSON workflow templates ready for 1-click import into Shuffle SOAR (Cloud/Docker). | 👉 **[🔀 Explore Workflows](playbooks/shuffle_workflows/README.md)** |
+| **Lab Network Topology & 16GB Setup** | Comprehensive IP addressing table, VM specifications, 16GB RAM budget optimization guide, and Wazuh webhook integration setup. | 👉 **[🌐 View Setup Guide](docs/lab_setup_topology.md)** |
+| **MITRE ATT&CK Matrix** | End-to-end defensive coverage mapping across Reconnaissance, Credential Access, Execution, and Active Response. | 👉 **[🎯 View MITRE Matrix](docs/mitre_attack_matrix.md)** |
+| **Attack Emulation Scripts** | Automated Bash and PowerShell scripts to safely simulate Nmap scans, LSASS memory dumping, and EICAR/malware file drops. | 👉 **[⚔️ View Scripts](scripts/attack_simulation/)** |
+
+---
+
 ## 📸 Key Visual Proof of Work
 
 | Interactive AI Triage (Google Gemini in Jira) | Containment Verification (100% Packet Loss) |
@@ -96,17 +108,25 @@ This repository adopts a modular **Hub & Spoke** documentation architecture. Cli
 ```text
 soc-soar-ai-lab/
 ├── README.md                                  # Landing page & architectural overview (You are here)
+├── LICENSE                                    # MIT Open-Source License
+├── .gitignore                                 # Production SecOps credential & cache filtering
+├── .env.example                               # Environment configuration template for API tokens
 ├── docs/
-│   ├── images/                                # High-resolution screenshots and proof-of-work
-│   │   ├── 00_wazuh_before_no_alerts.png
-│   │   ├── 02_nmap_scan_attack.png
-│   │   ├── 05_jira_ticket_pane1.png
-│   │   ├── 07_gemini_ai_comment.png
-│   │   └── 09_kali_ping_100_percent_loss.png
-│   └── playbooks/                             # Modular playbook documentation
-│       ├── playbook_1_lsass_dump_defense.md   # Full case study: LSASS credential dumping & AI triage
-│       ├── playbook_2_nmap_defense.md         # Full case study: Nmap defense & dynamic firewalling
-│       └── playbook_3_malware_containment_fim.md # Full case study: FIM malware detection & 1-click deletion
+│   ├── lab_setup_topology.md                  # Network IP schema, 16GB RAM sizing & setup guide
+│   ├── mitre_attack_matrix.md                 # Complete MITRE ATT&CK defensive mapping
+│   ├── images/                                # 41 High-resolution lab evidence screenshots
+│   └── playbooks/                             # Modular playbook case studies
+│       ├── playbook_1_lsass_dump_defense.md   # LSASS credential dumping & AI triage
+│       ├── playbook_2_nmap_defense.md         # Nmap defense & dynamic firewalling
+│       └── playbook_3_malware_containment_fim.md # FIM malware detection & 1-click deletion
+├── playbooks/
+│   └── shuffle_workflows/                     # 5 Production Shuffle SOAR JSON templates
+│       ├── README.md                          # Workflow import & configuration guide
+│       ├── workflow_nmap_recon_detection.json # Nmap scan detection & VT enrichment
+│       ├── workflow_nmap_firewall_block_ip.json # 1-Click IPTables firewall drop
+│       ├── workflow_fim_malware_detection.json # FIM malware detection & VT gatekeeper
+│       ├── workflow_fim_active_response_delete_file.json # 1-Click Windows file deletion
+│       └── workflow_gemini_ai_soc_triage.json # On-demand Gemini AI triage with ADF panel
 ├── configs/                                   # Production-ready detection configurations
 │   ├── wazuh/                                 # Custom correlation rules & webhook integrations
 │   │   ├── local_rules.xml
@@ -115,10 +135,14 @@ soc-soar-ai-lab/
 │   │   └── local.rules
 │   └── sysmon/                                # Windows Sysmon event filtering
 │       └── sysmonconfig.xml
-├── scripts/                                   # Host-level Active Response & utility scripts
-│   ├── active_response/
+├── scripts/
+│   ├── active_response/                       # Host-level Active Response wrappers
 │   │   ├── remove-threat.cmd                  # Windows PowerShell file deletion wrapper
 │   │   └── firewall-drop.sh                   # Linux IPTables dynamic isolation wrapper
+│   ├── attack_simulation/                     # Safe attack simulation scripts
+│   │   ├── simulate_nmap_scan.sh              # Nmap SYN stealth scan simulation
+│   │   ├── simulate_procdump_lsass.bat        # LSASS memory dump simulation
+│   │   └── simulate_malware_drop.ps1          # Monitored folder payload drop simulation
 │   └── helpers/
 │       └── gemini_prompt_builder.py           # Python string escaping & JSON sanitization
 └── prompts/                                   # Enterprise Generative AI prompts
@@ -137,6 +161,8 @@ soc-soar-ai-lab/
    - Overcame Atlassian v3 gateway rejections by strictly enforcing `Accept: application/json` and `Content-Type: application/json` headers within SOAR HTTP modules.
 4. **Snort Alert Cooldown & Threshold Tuning:**
    - Tuned Snort rule thresholds (`count 100, seconds 5`) to eliminate false-negative suppression windows while maintaining high-fidelity detection of Nmap stealth scans.
+5. **Eliminating SOAR Alert Fatigue via Threat Intel Gatekeeping:**
+   - Implemented conditional node routing (`stats.malicious > 0`) in Shuffle SOAR to automatically suppress benign file downloads (e.g., HWiNFO64), preventing ticket flooding in ITSM.
 
 ---
 
