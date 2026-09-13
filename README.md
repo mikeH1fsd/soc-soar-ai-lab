@@ -26,7 +26,7 @@ This project implements an **Enterprise-grade, Human-in-the-Loop (HitL) Security
 flowchart TD
     subgraph Detection["🔍 Telemetry & Detection Layer"]
         A1["🖥️ Windows Endpoint<br/>(Sysmon + Wazuh FIM)"]
-        A2["🐧 Ubuntu Web Server<br/>(Snort IDS + Wazuh Agent)"]
+        A2["🐧 Ubuntu Linux Server<br/>(Snort IDS + Wazuh Agent)"]
     end
 
     subgraph SIEM["🛡️ SIEM Core"]
@@ -71,6 +71,19 @@ flowchart TD
 
 ---
 
+## 🖥️ Lab Environment & Network Schema
+
+| Node / Thành phần | Môi trường / Nền tảng | Địa chỉ IP | Vai trò trong Lab |
+| :--- | :--- | :---: | :--- |
+| **Kali Linux** | Máy ảo (Attacker) | `192.168.109.165` | Máy tấn công: quét cổng Nmap, rà quét trinh sát mạng |
+| **Ubuntu Server** | Máy ảo (SIEM / NIDS) | `192.168.109.161` | Máy chủ Wazuh Manager (All-in-One) + Snort NIDS bắt gói tin |
+| **Windows 10** | Máy ảo (Endpoint) | `192.168.109.167` | Máy nạn nhân: cài Sysmon EID 10 và Wazuh Agent (FIM Realtime) |
+| **Shuffle SOAR** | Cloud SaaS (`shuffler.io`) | Online | Nền tảng điều phối tự động hóa phản ứng sự cố (SOAR) |
+| **Jira Cloud** | Cloud SaaS (`atlassian.net`) | Online | Hệ thống quản lý sự cố (ITSM) & giao diện duyệt phản ứng 1-Click |
+| **Google Gemini & VT** | Cloud API | Online | Thẩm định sự cố AI mức L3 & tra cứu Cyber Threat Intelligence |
+
+---
+
 ## 🚀 Incident Response Playbooks (Documentation Hub)
 
 This repository adopts a modular **Hub & Spoke** documentation architecture. Click on each playbook card below to read the comprehensive technical case study, step-by-step screenshots, and evidence trails:
@@ -78,7 +91,7 @@ This repository adopts a modular **Hub & Spoke** documentation architecture. Cli
 | Playbook | Threat Vector & Scope | Technology Stack | Detailed Case Study |
 | :--- | :--- | :--- | :---: |
 | **Playbook 1: OS Credential Dumping & AI Triage** | In-memory LSASS extraction via ProcDump (Atomic Red Team T1003.001). Sysmon Event ID 10 (`0x1fffff`), True Positive vs False Positive (`0x1410`) discrimination, and 6-step IR checklist. | Atomic Red Team, Sysmon, Wazuh SIEM, Shuffle SOAR, Jira Cloud, Google Gemini | 👉 **[📖 Read Case Study (14 Screenshots)](docs/playbooks/playbook_1_lsass_dump_defense.md)** |
-| **Playbook 2: Network Reconnaissance Defense** | Aggressive stealth Nmap SYN scanning against web server. Snort NIDS detection, Level 12 SIEM correlation, 1-click authorization, and dynamic IPTables isolation (100% loss proof). | Snort 2.9, Wazuh SIEM, Shuffle SOAR, Jira Cloud, Linux IPTables | 👉 **[📖 Read Case Study (11 Screenshots)](docs/playbooks/playbook_2_nmap_defense.md)** |
+| **Playbook 2: Network Reconnaissance Defense** | Aggressive stealth Nmap SYN scanning against Linux server (`192.168.109.161`). Snort NIDS detection, Level 12 SIEM correlation, 1-click authorization, and dynamic IPTables isolation (100% loss proof). | Snort 2.9, Wazuh SIEM, Shuffle SOAR, Jira Cloud, Linux IPTables | 👉 **[📖 Read Case Study (11 Screenshots)](docs/playbooks/playbook_2_nmap_defense.md)** |
 | **Playbook 3: Endpoint Malware Containment (FIM)** | Real-time Trojan drop in Downloads (`lesson29.exe`). Wazuh FIM detection, VirusTotal CTI (30/71 engines), Google Gemini AI triage, and 1-click active response file deletion. | Wazuh Realtime FIM, VirusTotal API, Shuffle SOAR, Jira Cloud, Active Response | 👉 **[📖 Read Case Study (15 Screenshots: Attack vs Benign Gatekeeper)](docs/playbooks/playbook_3_malware_containment_fim.md)** |
 
 ---
@@ -86,7 +99,6 @@ This repository adopts a modular **Hub & Spoke** documentation architecture. Cli
 ## 📚 Technical Reference Guides & Engineering Artifacts
 
 * 🔀 **[Shuffle SOAR Production Workflow Templates](playbooks/shuffle_workflows/README.md):** 5 ready-to-import JSON workflow files for Shuffle SOAR (Nmap Detection, Firewall Drop, FIM Malware, Active Response Delete, and Gemini AI Triage).
-* 🌐 **[Lab Network Topology & Hybrid Cloud Guide](docs/lab_setup_topology.md):** Complete network IP schema, 16GB RAM budget allocation (0GB host RAM for Cloud SOAR & Jira), and Wazuh webhook integration setup.
 * 🎯 **[MITRE ATT&CK Matrix Mapping](docs/mitre_attack_matrix.md):** Comprehensive defensive coverage mapping across Reconnaissance, Credential Access, Execution, and Active Response.
 * ⚔️ **[Attack Simulation Scripts](scripts/attack_simulation/):** Automated Bash, Batch, and PowerShell scripts to safely test and simulate attack telemetry across endpoints.
 
