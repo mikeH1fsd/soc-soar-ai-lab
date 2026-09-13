@@ -30,7 +30,7 @@ flowchart TD
     end
 
     subgraph SIEM["🛡️ SIEM Core"]
-        W1["Wazuh Manager<br/>(Correlation Rules 100055, 100002 & 100200)"]
+        W1["Wazuh Manager (192.168.109.158)<br/>(Correlation Rules 100055, 100002 & 100200)"]
     end
 
     subgraph SOAR["🔀 Automation & Orchestration (Shuffle Cloud)"]
@@ -76,8 +76,9 @@ flowchart TD
 | Node / Thành phần | Môi trường / Nền tảng | Địa chỉ IP | Vai trò trong Lab |
 | :--- | :--- | :---: | :--- |
 | **Kali Linux** | Máy ảo (Attacker) | `192.168.109.165` | Máy tấn công: quét cổng Nmap, rà quét trinh sát mạng |
-| **Ubuntu Server** | Máy ảo (SIEM / NIDS) | `192.168.109.161` | Máy chủ Wazuh Manager (All-in-One) + Snort NIDS bắt gói tin |
-| **Windows 10** | Máy ảo (Endpoint) | `192.168.109.167` | Máy nạn nhân: cài Sysmon EID 10 và Wazuh Agent (FIM Realtime) |
+| **Wazuh Server** | Máy ảo (SIEM Core) | `192.168.109.158` | Máy chủ Wazuh Manager (All-in-One): tương quan luật & điều phối phản ứng |
+| **Ubuntu Node** | Máy ảo (Target / NIDS) | `192.168.109.161` | Máy đích bị quét: chạy Snort NIDS (`1000005`) & Wazuh Agent `002` |
+| **Windows 10** | Máy ảo (Target / Endpoint) | `192.168.109.167` | Máy nạn nhân: cài Sysmon EID 10 và Wazuh Agent `003` (FIM Realtime) |
 | **Shuffle SOAR** | Cloud SaaS (`shuffler.io`) | Online | Nền tảng điều phối tự động hóa phản ứng sự cố (SOAR) |
 | **Jira Cloud** | Cloud SaaS (`atlassian.net`) | Online | Hệ thống quản lý sự cố (ITSM) & giao diện duyệt phản ứng 1-Click |
 | **Google Gemini & VT** | Cloud API | Online | Thẩm định sự cố AI mức L3 & tra cứu Cyber Threat Intelligence |

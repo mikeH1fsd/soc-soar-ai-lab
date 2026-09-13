@@ -31,7 +31,7 @@ sequenceDiagram
     autonumber
     actor Kali as 🥷 Attacker (Kali: 192.168.109.165)
     participant Snort as 👁️ Snort NIDS (Ubuntu: 192.168.109.161)
-    participant Wazuh as 🛡️ Wazuh SIEM Manager
+    participant Wazuh as 🛡️ Wazuh SIEM Manager (192.168.109.158)
     participant Shuffle as 🔀 Shuffle SOAR
     participant VT as 🌐 VirusTotal CTI
     actor Analyst as 👨‍💼 SOC Analyst (Jira)
