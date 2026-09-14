@@ -6,8 +6,10 @@
      Verification command: sudo /var/ossec/bin/agent_control -L
 ============================================================================== -->
 
-<!-- Command 1: Custom Windows Malware File Eradication -->
-<!-- Target: Windows Endpoint (Active Response Script: remove-threat.cmd) -->
+<!-- ==============================================================================
+     1. CUSTOM ACTIVE RESPONSE: Windows Malware Eradication (Playbook 3)
+     Target: Windows Endpoint (Active Response Script: remove-threat.cmd)
+============================================================================== -->
 <command>
   <name>remove-threat</name>
   <executable>remove-threat.cmd</executable>
@@ -20,18 +22,19 @@
      Because remediation is triggered on-demand via Jira Human-in-the-Loop REST API,
      we declare a dummy active-response block with a non-existent rule_id (999999).
      This forces the Manager to register 'remove-threat.cmd' into the agent's ar.conf
-     while preventing automatic trigger before analyst approval. -->
+     while preventing automated premature execution without human authorization. -->
 <active-response>
   <command>remove-threat</command>
   <location>local</location>
   <rules_id>999999</rules_id>
 </active-response>
 
-<!-- Command 2: Host Firewall Isolation (Linux IPTables) -->
-<!-- Target: Ubuntu Server (Active Response Script: firewall-drop.sh) -->
-<!-- Can be invoked dynamically via Wazuh REST API: PUT /active-response with command "!firewall-drop" -->
-<command>
-  <name>firewall-drop</name>
-  <executable>firewall-drop.sh</executable>
-  <timeout_allowed>yes</timeout_allowed>
-</command>
+<!-- ==============================================================================
+     2. NATIVE ACTIVE RESPONSE: Linux Host Firewall Isolation (Playbook 2)
+     Note: 'firewall-drop' is a pre-installed built-in script located on Linux agents
+     at /var/ossec/active-response/bin/firewall-drop.
+     Because it is a native Wazuh command, it requires NO additional <command> XML
+     configuration in ossec.conf. Shuffle SOAR invokes it directly via the Wazuh
+     Manager REST API by prefixing the command with an exclamation mark:
+     POST /active-response with body: {"command": "!firewall-drop"}
+============================================================================== -->

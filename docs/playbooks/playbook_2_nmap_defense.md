@@ -133,7 +133,7 @@ Having verified the malicious nature of the scan, the SOC Analyst clicks **⚡ A
 ---
 
 ### Step 7: Containment Verification (100% Packet Loss)
-Upon receiving the authorization webhook, Shuffle calls Wazuh REST API (`!firewall-drop`), dynamically injecting an iptables block rule on the Ubuntu web server.
+Upon receiving the authorization webhook, Shuffle calls the Wazuh REST API with the native built-in command `!firewall-drop`, dynamically executing the host containment script (`/var/ossec/active-response/bin/firewall-drop`) to inject an iptables drop rule on the Ubuntu web server.
 
 From the attacker machine (Kali), all network communications are immediately cut off:
 ```text
@@ -150,9 +150,7 @@ From the attacker machine (Kali), all network communications are immediately cut
 * **Snort NIDS Rule:** [`configs/snort/local.rules`](../../configs/snort/local.rules)
 * **Wazuh Correlation Rule:** [`configs/wazuh/local_rules.xml`](../../configs/wazuh/local_rules.xml)
 * **Wazuh Integration Hook:** [`configs/wazuh/ossec_integration.xml`](../../configs/wazuh/ossec_integration.xml)
-* **Wazuh Active Response Command:** [`configs/wazuh/ossec_active_response.xml`](../../configs/wazuh/ossec_active_response.xml)
 * **Wazuh Agent Snort Ingestion:** [`configs/wazuh/ossec_agent_inputs.xml`](../../configs/wazuh/ossec_agent_inputs.xml)
-* **Linux Active Response Script:** [`scripts/active_response/firewall-drop.sh`](../../scripts/active_response/firewall-drop.sh)
 * **AI SOC Prompt System:** [`prompts/soc_analyst_l3_prompt.md`](../../prompts/soc_analyst_l3_prompt.md)
 
 ---
