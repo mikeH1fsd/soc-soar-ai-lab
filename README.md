@@ -40,7 +40,7 @@ flowchart TD
     end
 
     subgraph AI["🧠 Generative AI Triage"]
-        G1["Google Gemini LLM<br/>(Zero-Hallucination SOC Prompt)"]
+        G1["Google Gemini API<br/>(Zero-Hallucination SOC Prompt)"]
     end
 
     subgraph ITSM["🎫 Human-in-the-Loop Interface (Jira Cloud)"]
@@ -73,15 +73,15 @@ flowchart TD
 
 ## 🖥️ Lab Environment & Network Schema
 
-| Node / Thành phần | Môi trường / Nền tảng | Địa chỉ IP | Vai trò trong Lab |
+| Node / Component | Platform / Deployment | IP Address | Lab Role & Responsibilities |
 | :--- | :--- | :---: | :--- |
-| **Kali Linux** | Máy ảo (Attacker) | `192.168.109.165` | Máy tấn công: quét cổng Nmap, rà quét trinh sát mạng |
-| **Wazuh Server** | Máy ảo (SIEM Core) | `192.168.109.158` | Máy chủ Wazuh Manager (All-in-One): tương quan luật & điều phối phản ứng |
-| **Ubuntu Node** | Máy ảo (Target / NIDS) | `192.168.109.161` | Máy đích bị quét: chạy Snort NIDS (`1000005`) & Wazuh Agent `002` |
-| **Windows 10** | Máy ảo (Target / Endpoint) | `192.168.109.167` | Máy nạn nhân: cài Sysmon EID 10 và Wazuh Agent `003` (FIM Realtime) |
-| **Shuffle SOAR** | Cloud SaaS (`shuffler.io`) | Online | Nền tảng điều phối tự động hóa phản ứng sự cố (SOAR) |
-| **Jira Cloud** | Cloud SaaS (`atlassian.net`) | Online | Hệ thống quản lý sự cố (ITSM) & giao diện duyệt phản ứng 1-Click |
-| **Google Gemini & VT** | Cloud API | Online | Thẩm định sự cố AI mức L3 & tra cứu Cyber Threat Intelligence |
+| **Kali Linux** | Virtual Machine (Attacker) | `192.168.109.165` | Adversary host: Nmap stealth port scanning & threat emulation |
+| **Wazuh Server** | Virtual Machine (SIEM Core) | `192.168.109.158` | Central Wazuh Manager (All-in-One): log correlation, rule engine & response dispatch |
+| **Ubuntu Node** | Virtual Machine (Target / NIDS) | `192.168.109.161` | Target server: Snort 2.9 NIDS (Rule `1000005`) & Wazuh Agent `002` |
+| **Windows 10** | Virtual Machine (Target / Endpoint) | `192.168.109.167` | Victim workstation: Microsoft Sysmon (Event ID 10) & Wazuh Agent `003` (Real-Time FIM) |
+| **Shuffle SOAR** | Cloud SaaS (`shuffler.io`) | Cloud (SaaS) | Security Orchestration, Automation, and Response (SOAR) workflow engine |
+| **Jira Cloud** | Cloud SaaS (`atlassian.net`) | Cloud (SaaS) | Incident Management (ITSM) & Human-in-the-Loop 1-Click containment interface |
+| **Google Gemini & VT** | Cloud REST APIs | Cloud (API) | L3 AI incident triage copilot & VirusTotal Cyber Threat Intelligence (CTI) |
 
 ---
 
@@ -91,17 +91,18 @@ This repository adopts a modular **Hub & Spoke** documentation architecture. Cli
 
 | Playbook & MITRE ATT&CK | Attack Vector & Telemetry | Technology Stack | Technical Case Study |
 | :--- | :--- | :--- | :---: |
-| **Playbook 1: OS Credential Dumping**<br/>`T1003.001` • `TA0006` | • ProcDump LSASS memory dump (Atomic Red Team)<br/>• Sysmon Event ID 10 (`GrantedAccess: 0x1fffff`)<br/>• Wazuh SIEM Rule 100200 (Level 12) | • `Atomic Red Team` / `ProcDump`<br/>• `Sysmon v14` (Event ID 10)<br/>• `Wazuh SIEM` (Rule 100200)<br/>• `Google Gemini 2.5 Flash`<br/>• `Jira Cloud v3` & `Shuffle SOAR` | [View Case Study →](docs/playbooks/playbook_1_lsass_dump_defense.md) |
-| **Playbook 2: Network Reconnaissance**<br/>`T1595.001` • `T1046` | • Stealth Nmap TCP SYN scan against internal host<br/>• Snort NIDS 2.9 detection (Rule `1:1000005:2`)<br/>• Wazuh SIEM Rule 100002 (Level 12) | • `Nmap 7.9x` (Stealth SYN)<br/>• `Snort 2.9 NIDS` (Rule 1000005)<br/>• `Wazuh SIEM` (Rule 100002)<br/>• `VirusTotal API v3` (IP CTI)<br/>• `Linux IPTables` (`firewall-drop.sh`) | [View Case Study →](docs/playbooks/playbook_2_nmap_defense.md) |
-| **Playbook 3: Endpoint Malware (FIM)**<br/>`T1204.002` • `T1105` | • Dropped Trojan executable in Downloads (`lesson29.exe`)<br/>• Wazuh Real-Time FIM detection (Rule 100055, Level 10)<br/>• VirusTotal threat intelligence (30/71 engines flagged) | • `Wazuh Real-Time FIM` (Rule 100055)<br/>• `VirusTotal API v3` (SHA256 lookup)<br/>• `Shuffle Condition Gatekeeper`<br/>• `Google Gemini 2.5 Flash`<br/>• `PowerShell Active Response` (`remove-threat.cmd`) | [View Case Study →](docs/playbooks/playbook_3_malware_containment_fim.md) |
+| **Playbook 1: OS Credential Dumping**<br/>`T1003.001` • `TA0006` | • ProcDump LSASS memory dump (Atomic Red Team)<br/>• Sysmon Event ID 10 (`GrantedAccess: 0x1fffff`)<br/>• Wazuh SIEM Rule 100200 (Level 12)<br/>• True Positive vs. False Positive Discrimination | Atomic Red Team, Sysmon, Wazuh SIEM, Shuffle SOAR, Jira Cloud, Google Gemini API | [View Case Study →](docs/playbooks/playbook_1_lsass_dump_defense.md) |
+| **Playbook 2: Network Reconnaissance**<br/>`T1595.002` • `T1046` | • Stealth Nmap TCP SYN scan against internal host<br/>• Snort 2.9 NIDS detection (Rule `1:1000005:2`)<br/>• Wazuh SIEM Rule 100002 (Level 12)<br/>• Host containment verification (100% packet loss) | Snort 2.9, Wazuh SIEM, VirusTotal API, Shuffle SOAR, Jira Cloud, Google Gemini API, Linux IPTables | [View Case Study →](docs/playbooks/playbook_2_nmap_defense.md) |
+| **Playbook 3: Endpoint Malware (FIM)**<br/>`T1204.002` • `T1105` | • Dropped Trojan executable in Downloads (`lesson29.exe`)<br/>• Wazuh Real-Time FIM detection (Rule 100055, Level 10)<br/>• VirusTotal threat intelligence (30/71 engines flagged)<br/>• Benign noise suppression filter (`HWiNFO64.exe`) | Wazuh Realtime FIM, VirusTotal API, Shuffle SOAR, Jira Cloud, Google Gemini API, Active Response | [View Case Study →](docs/playbooks/playbook_3_malware_containment_fim.md) |
 
 ---
 
 ## 📚 Technical Reference Guides & Engineering Artifacts
 
 * 🔀 **[Shuffle SOAR Production Workflow Templates](playbooks/shuffle_workflows/README.md):** 5 ready-to-import JSON workflow files for Shuffle SOAR (Nmap Detection, Firewall Drop, FIM Malware, Active Response Delete, and Gemini AI Triage).
-* 🎯 **[MITRE ATT&CK Matrix Mapping](docs/mitre_attack_matrix.md):** Comprehensive defensive coverage mapping across Reconnaissance, Credential Access, Execution, and Active Response.
-* ⚔️ **[Attack Simulation Scripts](scripts/attack_simulation/):** Automated Bash, Batch, and PowerShell scripts to safely test and simulate attack telemetry across endpoints.
+* ⚡ **[Production Active Response Scripts](scripts/active_response/):** Host-based containment scripts for dynamic firewall isolation (`firewall-drop.sh`) and endpoint threat eradication (`remove-threat.cmd`).
+* ⚙️ **[SIEM & Sensor Configurations](configs/):** Production detection rules for Wazuh Manager (`local_rules.xml`), Snort NIDS (`local.rules`), and Microsoft Sysmon telemetry filters (`sysmonconfig.xml`).
+* 🧠 **[AI SOC Copilot Prompt Engineering](prompts/soc_analyst_l3_prompt.md):** Zero-hallucination L3 SOC Analyst system prompt and structured JSON schema for Google Gemini API integration.
 
 ---
 

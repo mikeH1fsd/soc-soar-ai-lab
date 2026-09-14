@@ -1,5 +1,5 @@
 # 🌐 Playbook 2: Network Reconnaissance & Dynamic Firewalling
-### Case Study: Chặn Đứng Do Thám Quét Cổng Nmap Bằng Snort IDS, Wazuh SIEM & IPTables
+### Case Study: Thwarting Stealth Nmap Reconnaissance via Snort NIDS, Wazuh SIEM, VirusTotal CTI & Dynamic IPTables Containment
 
 ---
 
@@ -18,9 +18,9 @@
 
 | Tactical Phase | Matrix ID | Technique Name | Detection / Telemetry Source |
 | :--- | :--- | :--- | :--- |
-| **Reconnaissance (Chiến thuật)** | **TA0043** | Reconnaissance | Network traffic analysis, IDS alerts |
-| **Discovery (Kỹ thuật)** | **T1046** | Network Service Discovery | Snort NIDS (`local.rules`, TCP SYN flags) |
-| **Active Scanning (Kỹ thuật con)**| **T1595.002** | Vulnerability / Port Scanning | Snort thresholding & Wazuh SIEM correlation |
+| **Reconnaissance** | **TA0043** | Reconnaissance | Network traffic analysis, IDS alerts |
+| **Discovery** | **T1046** | Network Service Discovery | Snort NIDS (`local.rules`, TCP SYN flags) |
+| **Active Scanning** | **T1595.002** | Vulnerability / Port Scanning | Snort thresholding & Wazuh SIEM correlation |
 
 ---
 
@@ -38,7 +38,7 @@ sequenceDiagram
     participant IPTables as 🧱 Linux IPTables Firewall
 
     rect rgb(30, 40, 60)
-    Note over Kali,Analyst: [PHA 1: DETECTION, THREAT INTEL & TICKETING]
+    Note over Kali,Analyst: [PHASE 1: DETECTION, THREAT INTEL & TICKETING]
     Kali->>Snort: 1. Nmap Stealth SYN Scan (Ports 1-1000)
     Snort->>Snort: 2. Match Rule 1000005 (TCP Flags: SYN only)
     Snort->>Wazuh: 3. Agent streams log to Manager
@@ -50,7 +50,7 @@ sequenceDiagram
     end
 
     rect rgb(50, 30, 30)
-    Note over Analyst,IPTables: [PHA 2: HUMAN-IN-THE-LOOP CONTAINMENT]
+    Note over Analyst,IPTables: [PHASE 2: HUMAN-IN-THE-LOOP CONTAINMENT]
     Analyst->>Analyst: 9. Investigate Ticket & Click ⚡ [block ip]
     Analyst->>Shuffle: 10. Secondary Webhook fires
     Shuffle->>Wazuh: 11. REST API PUT /active-response (!firewall-drop)
