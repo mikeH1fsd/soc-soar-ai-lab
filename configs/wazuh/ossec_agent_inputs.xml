@@ -1,20 +1,10 @@
-<!-- ==============================================================================
-     Wazuh Agent Sensor & Telemetry Input Configurations
-     These blocks are deployed to ossec.conf on respective endpoint nodes.
-============================================================================== -->
-
-<!-- 1. Windows Endpoint Configuration -->
-<!-- File Location: C:\Program Files (x86)\ossec-agent\ossec.conf -->
-<!-- Enable Real-Time File Integrity Monitoring (FIM) on User Downloads directory -->
+<!-- Windows Agent: Real-Time FIM on Downloads (C:\Program Files (x86)\ossec-agent\ossec.conf) -->
 <syscheck>
   <directories realtime="yes" check_all="yes">C:\Users\*\Downloads</directories>
-  <!-- Whitelist benign temporary extensions to prevent alert noise -->
   <ignore type="sregex">\.tmp$|\.crdownload$</ignore>
 </syscheck>
 
-<!-- 2. Ubuntu Linux Node Configuration -->
-<!-- File Location: /var/ossec/etc/ossec.conf -->
-<!-- Ingest Snort 2.9 NIDS fast alert logs for SIEM correlation (Rule 100002) -->
+<!-- Linux Agent: Snort Fast Log Telemetry (/var/ossec/etc/ossec.conf) -->
 <localfile>
   <log_format>snort-fast</log_format>
   <location>/var/log/snort/snort.alert.fast</location>

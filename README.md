@@ -99,7 +99,7 @@ This repository adopts a modular **Hub & Spoke** documentation architecture. Cli
 
 ## 📚 Technical Reference Guides & Engineering Artifacts
 
-* 🔀 **[Shuffle SOAR Production Workflow Templates](playbooks/shuffle_workflows/README.md):** 5 ready-to-import JSON workflow files for Shuffle SOAR (Nmap Detection, Firewall Drop, FIM Malware, Active Response Delete, and Gemini AI Triage).
+* 🔀 **[Shuffle SOAR Production Workflow Templates](playbooks/shuffle_workflows/README.md):** 6 production-grade JSON workflow files for Shuffle SOAR (LSASS Dump Detection, Nmap Recon Detection, Firewall Drop, FIM Malware Detection, Active Response File Deletion, and Gemini AI SOC Triage).
 * ⚡ **[Custom Active Response Script](scripts/active_response/):** Production Windows malware containment script (`remove-threat.cmd`) invoked on-demand via SOAR 1-Click authorization.
 * ⚙️ **[SIEM & Sensor Configurations](configs/):** Production detection rules for Wazuh Manager (`local_rules.xml`), Snort NIDS (`local.rules`), and Microsoft Sysmon telemetry filters (`sysmonconfig.xml`).
 * 🧠 **[AI SOC Copilot Prompt Engineering](prompts/soc_analyst_l3_prompt.md):** Zero-hallucination L3 SOC Analyst system prompt and structured JSON schema for Google Gemini API integration.

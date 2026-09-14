@@ -115,10 +115,10 @@ Wazuh Manager dispatches an alert payload to Shuffle SOAR. Shuffle queries Virus
 ---
 
 ### Step 5: On-Demand AI Incident Triage (Google Gemini Integration)
-The analyst requests an AI second opinion by clicking **🤖 Hỏi AI SOC**. Google Gemini analyzes raw telemetry under an 8-rule anti-hallucination framework and returns a color-coded Callout Panel in under 3 seconds:
+The analyst requests an AI second opinion by clicking **🤖 Ask AI SOC (`AI_support`)**. Google Gemini analyzes raw telemetry under an 8-rule anti-hallucination framework and returns a color-coded Callout Panel in under 3 seconds:
 
 ![Google Gemini AI Incident Triage](../images/07_gemini_ai_comment.png)
-* **Verdict:** `TRUE_POSITIVE` | **Severity:** `CAO` (High)
+* **Verdict:** `TRUE_POSITIVE` | **Severity:** `HIGH`
 * **Technical Reasoning:** Confirms abnormal TCP SYN behavior targeting non-standard port 781 without completing handshake.
 * **MITRE ATT&CK:** `T1046 - Network Service Discovery`.
 * **Remediation Plan:** Immediate host-level firewall isolation.

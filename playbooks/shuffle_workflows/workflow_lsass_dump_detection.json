@@ -1,0 +1,503 @@
+{
+  "workflow_as_code": false,
+  "actions": [
+    {
+      "app_name": "Shuffle Tools",
+      "app_version": "1.2.0",
+      "description": "Runs python with the data input. Any prints will be returned. Avoid __main__ as it is not supported in this environment.",
+      "app_id": "3e2bdf9d5069fe3f4746c29d68785a6a",
+      "errors": null,
+      "id": "2027f565-744f-4933-8c51-5be545108602",
+      "is_valid": true,
+      "isStartNode": true,
+      "sharing": true,
+      "label": "Shuffle_Tools_1",
+      "public": true,
+      "generated": false,
+      "large_image": "data:image/svg+xml;utf-8,%3Csvg%20width=%2224%22%20height=%2224%22%20viewBox=%220%200%2048%2048%22%20version=%221.1%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath%20d=%22M17.3335%2028.1667L22.3335%2023.1667L17.3335%2018.1667%20M24%2029.8333H30.6667%22%20fill=%22none%22%20stroke=%22white%22%20stroke-width=%221.5%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3C/svg%3E",
+      "environment": "",
+      "name": "execute_python",
+      "parameters": [
+        {
+          "description": "The code to run. Can be a file ID from within Shuffle.",
+          "id": "",
+          "name": "code",
+          "example": "print(\"hello world\")",
+          "value": "import json\nimport traceback\n\n# Định nghĩa các hằng số của JSON để Python hiểu được\ntrue = True\nfalse = False\nnull = None\n\ndef to_dict(obj):\n    if isinstance(obj, str):\n        try:\n            return json.loads(obj)\n        except:\n            return {}\n    elif isinstance(obj, dict):\n        return obj\n    return {}\n\ndef clean_str(val):\n    if val is None:\n        return \"N/A\"\n    # Biến dấu \\ thành \\\\ để khi nhét vào JSON của Jira không bị lỗi Invalid \\escape\n    # Thay ngoặc kép \" thành ' để không vỡ chuỗi JSON\n    return str(val).replace('\\\\', '\\\\\\\\').replace('\"', \"'\")\n\ntry:\n    # Lấy thẳng cục dữ liệu từ Shuffle\n    alert = to_dict($exec)\n    \n    # Giải nén từng tầng an toàn 100%\n    text_data = to_dict(alert.get(\"text\", {}))\n    win_data = to_dict(text_data.get(\"win\", {}))\n    sysmon = to_dict(win_data.get(\"eventdata\", {}))\n    system = to_dict(win_data.get(\"system\", {}))\n    all_fields = to_dict(alert.get(\"all_fields\", {}))\n    agent = to_dict(all_fields.get(\"agent\", {}))\n    rule = to_dict(all_fields.get(\"rule\", {}))\n    \n    # 1. Gọt sạch các trường lẻ (Dành cho PANE 1 tự do thiết kế)\n    clean_data = {\n        \"agent_id\": clean_str(agent.get(\"id\", \"N/A\")),\n        \"rule_id\": clean_str(alert.get(\"rule_id\", \"N/A\")),\n        \"rule_desc\": clean_str(rule.get(\"description\", \"N/A\")),\n        \"timestamp\": clean_str(system.get(\"systemTime\", alert.get(\"timestamp\", \"N/A\"))),\n        \"source_pid\": clean_str(sysmon.get(\"sourceProcessId\", \"N/A\")),\n        \"source_image\": clean_str(sysmon.get(\"sourceImage\", \"N/A\")),\n        \"target_pid\": clean_str(sysmon.get(\"targetProcessId\", \"N/A\")),\n        \"target_image\": clean_str(sysmon.get(\"targetImage\", \"N/A\"))\n    }\n    \n    # 2. Vét sạch TOÀN BỘ các trường phong phú của Alert (Dành cho PANE 2)\n    pane2_lines = []\n    \n    # Nhóm 1: Chi tiết Rule & MITRE ATT&CK\n    pane2_lines.append(\"=== [RULE & MITRE ATT&CK] ===\")\n    pane2_lines.append(f\"Rule_ID: {clean_str(alert.get('rule_id', 'N/A'))}\")\n    pane2_lines.append(f\"Rule_Level: {clean_str(rule.get('level', 'N/A'))}\")\n    pane2_lines.append(f\"Rule_Description: {clean_str(rule.get('description', 'N/A'))}\")\n    mitre = to_dict(rule.get(\"mitre\", {}))\n    if mitre:\n        pane2_lines.append(f\"MITRE_IDs: {', '.join(mitre.get('id', []))}\")\n        pane2_lines.append(f\"MITRE_Tactics: {', '.join(mitre.get('tactic', []))}\")\n        pane2_lines.append(f\"MITRE_Techniques: {', '.join(mitre.get('technique', []))}\")\n    pane2_lines.append(f\"Fired_Times: {clean_str(rule.get('firedtimes', 'N/A'))}\")\n    \n    # Nhóm 2: Thông tin Endpoint & Wazuh Agent\n    pane2_lines.append(\"\")\n    pane2_lines.append(\"=== [ENDPOINT & AGENT CONTEXT] ===\")\n    pane2_lines.append(f\"Agent_ID: {clean_str(agent.get('id', 'N/A'))}\")\n    pane2_lines.append(f\"Agent_Name: {clean_str(agent.get('name', 'N/A'))}\")\n    pane2_lines.append(f\"Agent_IP: {clean_str(agent.get('ip', 'N/A'))}\")\n    pane2_lines.append(f\"Computer: {clean_str(system.get('computer', 'N/A'))}\")\n    pane2_lines.append(f\"Sysmon_EventID: {clean_str(system.get('eventID', 'N/A'))}\")\n    pane2_lines.append(f\"Channel: {clean_str(system.get('channel', 'N/A'))}\")\n    \n    # Nhóm 3: Dữ liệu Sysmon chi tiết (Raw Telemetry)\n    pane2_lines.append(\"\")\n    pane2_lines.append(\"=== [SYSMON PROCESS TELEMETRY] ===\")\n    if isinstance(sysmon, dict):\n        for key, val in sysmon.items():\n            pane2_lines.append(f\"{key}: {clean_str(val).replace(chr(10), ' | ')}\")\n            \n    clean_data[\"all_fields_dump\"] = \"\\n\".join(pane2_lines)\n    \n    # IN RA KẾT QUẢ (Shuffle Tools sẽ lấy cái dòng print này trả về trong trường message)\n    print(json.dumps(clean_data))\n        \nexcept Exception as e:\n    print(json.dumps({\"error\": str(traceback.format_exc())}))",
+          "multiline": true,
+          "multiselect": false,
+          "options": null,
+          "action_field": "",
+          "variant": "",
+          "required": true,
+          "configuration": false,
+          "tags": null,
+          "schema": {
+            "type": "string"
+          },
+          "skip_multicheck": false,
+          "custom_value": false,
+          "value_replace": null,
+          "unique_toggled": false,
+          "error": "",
+          "hidden": false
+        }
+      ],
+      "execution_variable": {
+        "description": "",
+        "id": "",
+        "name": "",
+        "value": ""
+      },
+      "position": {
+        "x": 799.6133573497037,
+        "y": 393.6696657157244
+      },
+      "authentication_id": "",
+      "category": "AI",
+      "reference_url": "",
+      "sub_action": false,
+      "run_magic_output": false,
+      "run_magic_input": false,
+      "execution_delay": 0,
+      "category_label": [
+        "execute_(code)"
+      ],
+      "suggestion": false,
+      "parent_controlled": false,
+      "source_workflow": "",
+      "source_execution": ""
+    },
+    {
+      "app_name": "Jira",
+      "app_version": "1.1.0",
+      "description": "Creates an issue or, where the option to create subtasks is enabled in Jira, a subtask. A transition may be applied, to move the issue or subtask to a workflow step other than the default start step, and issue properties set.\n\nhttps://shuffletest.atlassian.net/rest/api/3/issue",
+      "app_id": "eb0c5e572e14ac1140a8355ba93c0d76",
+      "errors": null,
+      "id": "821b3c33-9c1e-4c02-9b2a-b962ab02016c",
+      "is_valid": true,
+      "sharing": true,
+      "private_id": "eb0c5e572e14ac1140a8355ba93c0d76",
+      "label": "Jira_1",
+      "public": true,
+      "generated": true,
+      "environment": "",
+      "name": "post_create_issue",
+      "parameters": [
+        {
+          "description": "The username to use",
+          "id": "",
+          "name": "username_basic",
+          "example": "The username to use",
+          "value": "",
+          "multiline": false,
+          "multiselect": false,
+          "options": null,
+          "action_field": "",
+          "variant": "STATIC_VALUE",
+          "required": true,
+          "configuration": true,
+          "tags": null,
+          "schema": {
+            "type": "string"
+          },
+          "skip_multicheck": false,
+          "custom_value": false,
+          "value_replace": null,
+          "unique_toggled": false,
+          "error": "",
+          "hidden": false,
+          "is_valid": false
+        },
+        {
+          "description": "The password to use",
+          "id": "",
+          "name": "password_basic",
+          "example": "***********",
+          "value": "",
+          "multiline": false,
+          "multiselect": false,
+          "options": null,
+          "action_field": "",
+          "variant": "STATIC_VALUE",
+          "required": true,
+          "configuration": true,
+          "tags": null,
+          "schema": {
+            "type": "string"
+          },
+          "skip_multicheck": false,
+          "custom_value": false,
+          "value_replace": null,
+          "unique_toggled": false,
+          "error": "",
+          "hidden": false,
+          "is_valid": false
+        },
+        {
+          "description": "The URL of the API",
+          "id": "",
+          "name": "url",
+          "example": "https://shuffletest.atlassian.net",
+          "value": "",
+          "multiline": false,
+          "multiselect": false,
+          "options": null,
+          "action_field": "",
+          "variant": "STATIC_VALUE",
+          "required": true,
+          "configuration": true,
+          "tags": null,
+          "schema": {
+            "type": "string"
+          },
+          "skip_multicheck": false,
+          "custom_value": false,
+          "value_replace": null,
+          "unique_toggled": false,
+          "error": "",
+          "hidden": false,
+          "is_valid": false
+        },
+        {
+          "description": "Generated by shuffler.io OpenAPI",
+          "id": "",
+          "name": "body",
+          "example": "{\n  \"fields\": {\n    \"project\": {\n      \"key\": \"PROJ\"\n    },\n    \"summary\": \"Issue summary\",\n    \"issuetype\": {\n      \"name\": \"Bug\"\n    }\n  }\n}",
+          "value": "{\n  \"fields\": {\n    \"project\": { \"key\": \"SA\" },\n    \"summary\": \"🚨 SOC Alert: Hành vi truy cập tiến trình đáng ngờ\",\n    \"description\": {\n      \"version\": 1,\n      \"type\": \"doc\",\n      \"content\": [\n        {\n          \"type\": \"paragraph\",\n          \"content\": [{\"type\": \"text\", \"text\": \"⚡ QUICK ALERT SUMMARY (PANE 1)\", \"marks\": [{\"type\": \"strong\"}]}]\n        },\n        {\n          \"type\": \"paragraph\",\n          \"content\": [{\"type\": \"text\", \"text\": \"Thời gian (UTC): $shuffle_tools_1.message.timestamp\"}]\n        },\n        {\n          \"type\": \"paragraph\",\n          \"content\": [{\"type\": \"text\", \"text\": \"Agent_ID: $shuffle_tools_1.message.agent_id\"}]\n        },\n        {\n          \"type\": \"paragraph\",\n          \"content\": [{\"type\": \"text\", \"text\": \"Source_PID: $shuffle_tools_1.message.source_pid\"}]\n        },\n        {\n          \"type\": \"paragraph\",\n          \"content\": [{\"type\": \"text\", \"text\": \"Source_Image: $shuffle_tools_1.message.source_image\"}]\n        },\n        {\n          \"type\": \"paragraph\",\n          \"content\": [{\"type\": \"text\", \"text\": \"Target_PID: $shuffle_tools_1.message.target_pid\"}]\n        },\n        {\n          \"type\": \"paragraph\",\n          \"content\": [{\"type\": \"text\", \"text\": \"Target_Image: $shuffle_tools_1.message.target_image\"}]\n        },\n        {\n          \"type\": \"paragraph\",\n          \"content\": [{\"type\": \"text\", \"text\": \"🔍 CHI TIẾT ĐIỀU TRA (PANE 2 - TẤT CẢ CÁC FIELD)\", \"marks\": [{\"type\": \"strong\"}]}]\n        },\n        {\n          \"type\": \"codeBlock\",\n          \"attrs\": {\"language\": \"yaml\"},\n          \"content\": [{\"type\": \"text\", \"text\": \"$shuffle_tools_1.message.all_fields_dump\"}]\n        }\n      ]\n    },\n    \"issuetype\": { \"name\": \"Bug\" }\n  }\n}",
+          "multiline": true,
+          "multiselect": false,
+          "options": null,
+          "action_field": "",
+          "variant": "STATIC_VALUE",
+          "required": true,
+          "configuration": false,
+          "tags": null,
+          "schema": {
+            "type": "string"
+          },
+          "skip_multicheck": false,
+          "custom_value": false,
+          "value_replace": null,
+          "unique_toggled": false,
+          "error": "",
+          "hidden": false
+        },
+        {
+          "description": "Add or edit headers",
+          "id": "",
+          "name": "headers",
+          "example": "Content-Type=application/json\nAccept=application/json\r\n",
+          "value": "Accept=application/json\nContent-Type=application/json",
+          "multiline": true,
+          "multiselect": false,
+          "options": null,
+          "action_field": "",
+          "variant": "STATIC_VALUE",
+          "required": false,
+          "configuration": false,
+          "tags": null,
+          "schema": {
+            "type": "string"
+          },
+          "skip_multicheck": false,
+          "custom_value": false,
+          "value_replace": null,
+          "unique_toggled": false,
+          "error": "",
+          "hidden": false
+        },
+        {
+          "description": "Add or edit queries",
+          "id": "",
+          "name": "queries",
+          "example": "view=basic&redirect=test",
+          "value": "",
+          "multiline": true,
+          "multiselect": false,
+          "options": null,
+          "action_field": "",
+          "variant": "STATIC_VALUE",
+          "required": false,
+          "configuration": false,
+          "tags": null,
+          "schema": {
+            "type": "string"
+          },
+          "skip_multicheck": false,
+          "custom_value": false,
+          "value_replace": null,
+          "unique_toggled": false,
+          "error": "",
+          "hidden": false
+        },
+        {
+          "description": "Check if you want to verify request",
+          "id": "",
+          "name": "ssl_verify",
+          "example": "True",
+          "value": "False",
+          "multiline": false,
+          "multiselect": false,
+          "options": [
+            "False",
+            "True"
+          ],
+          "action_field": "",
+          "variant": "STATIC_VALUE",
+          "required": false,
+          "configuration": false,
+          "tags": null,
+          "schema": {
+            "type": "string"
+          },
+          "skip_multicheck": false,
+          "custom_value": false,
+          "value_replace": null,
+          "unique_toggled": false,
+          "error": "",
+          "hidden": false
+        },
+        {
+          "description": "Choose if we should write the result straight to a file or not",
+          "id": "",
+          "name": "to_file",
+          "example": "False",
+          "value": "False",
+          "multiline": false,
+          "multiselect": false,
+          "options": [
+            "False",
+            "True"
+          ],
+          "action_field": "",
+          "variant": "STATIC_VALUE",
+          "required": false,
+          "configuration": false,
+          "tags": null,
+          "schema": {
+            "type": "string"
+          },
+          "skip_multicheck": false,
+          "custom_value": false,
+          "value_replace": null,
+          "unique_toggled": false,
+          "error": "",
+          "hidden": false
+        }
+      ],
+      "execution_variable": {
+        "description": "",
+        "id": "",
+        "name": "",
+        "value": ""
+      },
+      "position": {
+        "x": 1170.2325608405874,
+        "y": 398.3499988854114
+      },
+      "authentication_id": "",
+      "category": "Cases",
+      "reference_url": "",
+      "sub_action": false,
+      "run_magic_output": false,
+      "run_magic_input": false,
+      "execution_delay": 0,
+      "category_label": [
+        "Create ticket"
+      ],
+      "suggestion": false,
+      "parent_controlled": false,
+      "source_workflow": "",
+      "source_execution": ""
+    }
+  ],
+  "branches": [
+    {
+      "destination_id": "2027f565-744f-4933-8c51-5be545108602",
+      "id": "a3232b11-c583-48a3-8278-895232b09064",
+      "source_id": "80dde208-c51f-4f74-9d5b-3b85d0860ee4",
+      "label": "",
+      "has_errors": false,
+      "conditions": null,
+      "decorator": false,
+      "parent_controlled": false,
+      "source_parent": ""
+    },
+    {
+      "destination_id": "821b3c33-9c1e-4c02-9b2a-b962ab02016c",
+      "id": "51b2b763-473f-4e46-b2b3-364abd9babdf",
+      "source_id": "2027f565-744f-4933-8c51-5be545108602",
+      "label": "",
+      "has_errors": false,
+      "conditions": null,
+      "decorator": false,
+      "parent_controlled": false,
+      "source_parent": ""
+    }
+  ],
+  "triggers": [
+    {
+      "app_name": "Webhook",
+      "description": "Custom HTTP input trigger",
+      "long_description": "Execute a workflow with an unauthicated POST request",
+      "status": "stopped",
+      "app_version": "1.0.0",
+      "errors": null,
+      "id": "80dde208-c51f-4f74-9d5b-3b85d0860ee4",
+      "is_valid": true,
+      "isStartNode": true,
+      "label": "Webhook_1",
+      "environment": "cloud",
+      "trigger_type": "WEBHOOK",
+      "name": "Webhook",
+      "parameters": [
+        {
+          "description": "",
+          "id": "",
+          "name": "url",
+          "example": "",
+          "value": "https://shuffler.io/api/v1/hooks/webhook_1344019a-8ced-45ee-9f1e-7ecc20a5363c",
+          "multiline": false,
+          "multiselect": false,
+          "options": null,
+          "action_field": "",
+          "variant": "",
+          "required": false,
+          "configuration": false,
+          "tags": null,
+          "schema": {
+            "type": ""
+          },
+          "skip_multicheck": false,
+          "custom_value": false,
+          "value_replace": null,
+          "unique_toggled": false,
+          "error": "",
+          "hidden": false
+        },
+        {
+          "description": "",
+          "id": "",
+          "name": "tmp",
+          "example": "",
+          "value": "",
+          "multiline": false,
+          "multiselect": false,
+          "options": null,
+          "action_field": "",
+          "variant": "",
+          "required": false,
+          "configuration": false,
+          "tags": null,
+          "schema": {
+            "type": ""
+          },
+          "skip_multicheck": false,
+          "custom_value": false,
+          "value_replace": null,
+          "unique_toggled": false,
+          "error": "",
+          "hidden": false
+        },
+        {
+          "description": "",
+          "id": "",
+          "name": "auth_headers",
+          "example": "",
+          "value": "",
+          "multiline": false,
+          "multiselect": false,
+          "options": null,
+          "action_field": "",
+          "variant": "",
+          "required": false,
+          "configuration": false,
+          "tags": null,
+          "schema": {
+            "type": ""
+          },
+          "skip_multicheck": false,
+          "custom_value": false,
+          "value_replace": null,
+          "unique_toggled": false,
+          "error": "",
+          "hidden": false
+        },
+        {
+          "description": "",
+          "id": "",
+          "name": "custom_response_body",
+          "example": "",
+          "value": "",
+          "multiline": false,
+          "multiselect": false,
+          "options": null,
+          "action_field": "",
+          "variant": "",
+          "required": false,
+          "configuration": false,
+          "tags": null,
+          "schema": {
+            "type": ""
+          },
+          "skip_multicheck": false,
+          "custom_value": false,
+          "value_replace": null,
+          "unique_toggled": false,
+          "error": "",
+          "hidden": false
+        },
+        {
+          "description": "",
+          "id": "",
+          "name": "await_response",
+          "example": "",
+          "value": "v1",
+          "multiline": false,
+          "multiselect": false,
+          "options": null,
+          "action_field": "",
+          "variant": "",
+          "required": false,
+          "configuration": false,
+          "tags": null,
+          "schema": {
+            "type": ""
+          },
+          "skip_multicheck": false,
+          "custom_value": false,
+          "value_replace": null,
+          "unique_toggled": false,
+          "error": "",
+          "hidden": false
+        }
+      ],
+      "position": {
+        "x": 388.2833454431988,
+        "y": 389.43473338661755
+      },
+      "priority": 0,
+      "source_workflow": "",
+      "execution_delay": 0,
+      "parent_controlled": false,
+      "replacement_for_trigger": ""
+    }
+  ],
+  "configuration": {
+    "exit_on_error": false,
+    "start_from_top": false,
+    "skip_notifications": false
+  },
+  "created": 0,
+  "edited": 0,
+  "last_runtime": 0,
+  "due_date": 0,
+  "id": "eab28a80-43cd-4121-a709-2bf957e1b126",
+  "is_valid": true,
+  "name": "Kich_Ban_4_eventcode_10",
+  "description": "Playbook 1: LSASS Memory Access (Sysmon Event ID 10) Alert Ingestion & Jira Ticket Creation Workflow",
+  "start": "2027f565-744f-4933-8c51-5be545108602",
+  "owner": "",
+  "sharing": "private"
+}

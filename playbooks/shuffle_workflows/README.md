@@ -1,29 +1,30 @@
 # 🔀 Shuffle SOAR Production Workflow Templates
 
-Thư mục này chứa toàn bộ các file JSON mã nguồn quy trình tự động hóa (SOAR Workflows) đã được kiểm chứng thực tế trong phòng Lab SOC Automation. Các kỹ sư hoặc nhà tuyển dụng có thể tải trực tiếp các file này và **Import 1-Click** vào hệ thống Shuffle SOAR (Cloud hoặc On-Premise Docker) để tái hiện lại 100% các kịch bản phản ứng sự cố.
+This directory contains the complete collection of production-grade SOAR workflow definitions (JSON schemas) verified and executed within this SOC Automation Lab. Security engineers and hiring managers can import these templates directly into **Shuffle SOAR** (Cloud or self-hosted Docker) to reproduce 100% of the incident response playbooks.
 
 ---
 
-## 📂 Danh Sách Các Workflow Tự Động Hóa
+## 📂 Catalog of SOAR Automated Workflows
 
-| STT | Tên File Workflow | Mục Tiêu & Chức Năng | Điểm Kích Hoạt (Trigger) | Các Ứng Dụng Liên Quan |
+| # | Workflow File | Description & Capability | Ingestion Trigger | Integrated Apps |
 | :---: | :--- | :--- | :--- | :--- |
-| **01** | [`workflow_nmap_recon_detection.json`](workflow_nmap_recon_detection.json) | Nhận cảnh báo Nmap từ Wazuh, tra cứu IP kẻ tấn công trên VirusTotal, chuẩn hóa dữ liệu 2-Pane và tạo Ticket Jira cảnh báo L12. | Webhook từ Wazuh Manager (Rule 100002 / Snort SID 1:1000005:2) | Wazuh, VirusTotal v3, Shuffle Tools, Jira Cloud v3 |
-| **02** | [`workflow_nmap_firewall_block_ip.json`](workflow_nmap_firewall_block_ip.json) | Nhận lệnh 1-Click từ Jira (`☢️ CHẶN IP TẤN CÔNG`), lấy JWT token từ Wazuh API, kích hoạt Active Response cách ly IP bằng IPTables và cập nhật báo cáo vào Jira. | Webhook từ Jira Automation (Button Click) | Jira Cloud, Shuffle Tools, Wazuh REST API (`firewall-drop`) |
-| **03** | [`workflow_fim_malware_detection.json`](workflow_fim_malware_detection.json) | Giám sát toàn vẹn file (FIM), đối soát mã băm SHA256 với VirusTotal. **Bộ lọc Gatekeeper**: Nếu file an toàn (`malicious == 0`), quy trình dừng ngay lập tức; nếu độc hại, tạo Ticket Jira 2-Pane. | Webhook từ Wazuh FIM (Rule 100055) | Wazuh FIM, VirusTotal v3, Shuffle Condition Node, Jira Cloud v3 |
-| **04** | [`workflow_fim_active_response_delete_file.json`](workflow_fim_active_response_delete_file.json) | Nhận lệnh 1-Click từ Jira (`☢️ XÓA FILE MÃ ĐỘC`), bóc tách chính xác đường dẫn file Windows, gọi Wazuh API kích hoạt script PowerShell `remove-threat0` để tiêu diệt mã độc. | Webhook từ Jira Automation (Button Click) | Jira Cloud, Shuffle Tools, Wazuh REST API (`remove-threat0`) |
-| **05** | [`workflow_gemini_ai_soc_triage.json`](workflow_gemini_ai_soc_triage.json) | Bộ thẩm định AI On-Demand: trích xuất toàn bộ telemetry từ Jira, áp dụng 8 quy tắc Prompt Zero-Hallucination, gọi Google Gemini Flash, chuyển hóa kết quả thành ADF Callout Panel đa màu sắc gửi về Jira. | Webhook từ Jira Automation (Button Click) | Jira Cloud, Google Gemini 2.5 Flash, Shuffle Tools (ADF Builder) |
+| **01** | [`workflow_lsass_dump_detection.json`](workflow_lsass_dump_detection.json) | **Playbook 1: LSASS Memory Access Ingestion.** Ingests Sysmon Event ID 10 alerts from Wazuh Manager (Rule 100200), normalizes process IDs, access masks, and call stack traces via Python, and creates a high-priority 2-Pane Jira incident ticket. | Webhook from Wazuh Manager (`Rule 100200`) | Wazuh, Shuffle Tools (Python), Jira Cloud v3 |
+| **02** | [`workflow_gemini_ai_soc_triage.json`](workflow_gemini_ai_soc_triage.json) | **Playbook 1, 2, 3: On-Demand AI SOC Triage Copilot.** Extracts telemetry from Jira issues, evaluates events against the L3 SOC anti-hallucination prompt using Google Gemini API, and renders structured, color-coded ADF Callout Panels (Red for True Positive, Green for False Positive) in Jira comments. | Webhook from Jira Automation (`AI_support`) | Jira Cloud v3, Google Gemini API, Shuffle Tools |
+| **03** | [`workflow_nmap_recon_detection.json`](workflow_nmap_recon_detection.json) | **Playbook 2: Nmap Reconnaissance Ingestion.** Receives Snort SYN scan detections from Wazuh Manager (Rule 100002), queries VirusTotal v3 for attacker IP threat score, formats 2-Pane ADF payload, and auto-generates Jira Incident Ticket SA-72. | Webhook from Wazuh Manager (`Rule 100002`) | Wazuh, VirusTotal v3, Shuffle Tools, Jira Cloud v3 |
+| **04** | [`workflow_nmap_firewall_block_ip.json`](workflow_nmap_firewall_block_ip.json) | **Playbook 2: Network Containment (IPTables Block).** Receives 1-click authorization from Jira (`block ip`), acquires JWT authentication from Wazuh API, issues Active Response command `!firewall-drop` to inject dynamic IPTables block, and reports status to Jira. | Webhook from Jira Automation (`block ip`) | Jira Cloud v3, Shuffle Tools, Wazuh REST API (`firewall-drop`) |
+| **05** | [`workflow_fim_malware_detection.json`](workflow_fim_malware_detection.json) | **Playbook 3: Real-time FIM & CTI Gatekeeper.** Monitors Windows file additions via Wazuh FIM (Rule 100055), queries VirusTotal v3 for SHA256 file hash reputation, and enforces condition filtering: halts on benign files (`malicious == 0`, zero alert spam) or creates Jira Ticket SA-79 for confirmed threats. | Webhook from Wazuh FIM (`Rule 100055`) | Wazuh FIM, VirusTotal v3, Shuffle Condition Node, Jira Cloud v3 |
+| **06** | [`workflow_fim_active_response_delete_file.json`](workflow_fim_active_response_delete_file.json) | **Playbook 3: Host File Eradication.** Receives 1-click authorization from Jira (`delete_window_file_to_shuffle`), extracts target Windows path, acquires Wazuh API JWT token, invokes Active Response command `remove-threat0` on Agent 003, and posts eradication proof to Jira. | Webhook from Jira Automation (`delete_window_file_to_shuffle`) | Jira Cloud v3, Shuffle Tools, Wazuh REST API (`remove-threat0`) |
 
 ---
 
-## 🛠️ Hướng Dẫn Import Vào Shuffle SOAR
+## 🛠️ Step-by-Step Import Guide
 
-1. **Đăng nhập vào Shuffle SOAR** (Giao diện Web `http://<IP_SHUFFLE>:3001` hoặc Shuffler.io Cloud).
-2. Di chuyển đến tab **Workflows** ➡️ Nhấp vào nút **Import Workflow**.
-3. Chọn file JSON tương ứng (ví dụ: `workflow_fim_malware_detection.json`).
-4. **Cấu hình Secret & Credential**:
-   * **VirusTotal App**: Cung cấp API Key cá nhân trong phần Authentication của node `Virustotal_v3_1`.
-   * **Jira App**: Cung cấp URL (`https://your-domain.atlassian.net`), Email và Jira API Token.
-   * **Wazuh API**: Khai báo Username/Password của tài khoản Wazuh API để node `Get_Token` tạo JWT Bearer token hợp lệ.
-   * **Google Gemini App**: Nhập Gemini API Key tại node `post_generate_content_with_flash`.
-5. Bật trạng thái workflow sang **Active / Running**.
+1. **Access Shuffle SOAR**: Open the Shuffle Web Interface (`http://<SHUFFLE_IP>:3001` or Shuffler.io Cloud).
+2. **Navigate to Workflows**: Go to the **Workflows** tab and click **Import Workflow**.
+3. **Upload Schema**: Select the desired `.json` file from this directory (e.g., `workflow_fim_malware_detection.json`).
+4. **Configure Secrets & Credentials**:
+   * **VirusTotal App**: Supply your VirusTotal API Key in the Authentication settings of the `Virustotal_v3` node.
+   * **Jira Cloud App**: Enter your Jira Cloud URL (`https://your-domain.atlassian.net`), registered account email, and Jira API Token.
+   * **Wazuh API**: Provide the Wazuh API credentials (`wazuh-wui` or dedicated API user) in the `Get_Token` HTTP node to obtain valid JWT Bearer tokens.
+   * **Google Gemini API**: Provide your Google Gemini API Key in the `post_generate_content_with_flash` node.
+5. **Activate**: Toggle the workflow status to **Active / Running** and configure your Wazuh or Jira webhooks to target the generated webhook URI.

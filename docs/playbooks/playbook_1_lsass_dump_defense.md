@@ -34,7 +34,7 @@ This case study demonstrates an end-to-end investigation pipeline for **MITRE AT
 | **Granted Access** | `0x1fffff` (PROCESS_ALL_ACCESS) | `0x1410` (QUERY_LIMITED + VM_READ) |
 | **User Account** | `DESKTOP-LC5KHD6\SONY` (Interactive User) | `NT AUTHORITY\SYSTEM` (System Service) |
 | **Call Stack Trace** | `ntdll.dll` -> `KERNELBASE.dll` | `sysinfo.dll` -> `syscollector.dll` -> `wow64.dll` |
-| **Gemini Verdict** | 🛑 `[TRUE_POSITIVE - Mức độ: KHẨN CẤP]` (Red Panel) | ✅ `[FALSE_POSITIVE - Mức độ: THẤP]` (Green Panel) |
+| **Gemini Verdict** | 🛑 `[TRUE_POSITIVE - Severity: CRITICAL]` (Red Panel) | ✅ `[FALSE_POSITIVE - Severity: LOW]` (Green Panel) |
 | **Remediation Action**| Network host isolation, memory acquisition, credential reset | Whitelist in SIEM correlation rule, close ticket |
 
 ---
@@ -162,7 +162,7 @@ Within 2.5 seconds, Google Gemini returns a structured, color-coded **ADF Callou
 
 * **Part 1: Triage Verdict & Attacker Intent Analysis:**
 ![Gemini AI Triage Verdict](../images/pb1_09_gemini_ai_triage_verdict.png)
-  * **Verdict:** `[TRUE_POSITIVE | Mức độ: KHẨN CẤP]`
+  * **Verdict:** `[TRUE_POSITIVE | Severity: CRITICAL]`
   * **Technical Reasoning:** Verifies `procdump64.exe` accessed `lsass.exe` with `PROCESS_ALL_ACCESS (0x1fffff)`. Path `AtomicRedTeam` confirms active credential harvesting behavior.
   * **Adversary Intent:** Stealing credentials to facilitate Lateral Movement, Privilege Escalation, or Persistence.
 
@@ -199,9 +199,9 @@ The analyst triggers **`AI_support`** on Ticket SA-77. Google Gemini parses the 
 
 ![Gemini AI False Positive Triage](../images/pb1_13_fp_gemini_ai_false_positive.png)
 
-* **Verdict:** ✅ `[FALSE_POSITIVE | Mức độ: THAP]`
+* **Verdict:** ✅ `[FALSE_POSITIVE | Severity: LOW]`
 * **Technical Reasoning:** Confirms `wazuh-agent.exe` only requested query and read privileges (`PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_VM_READ`). The call stack explicitly references `sysinfo.dll` and `syscollector.dll`.
-* **Attacker Intent:** `N/A - Hanh vi hop le` (Benign administrative behavior).
+* **Attacker Intent:** `N/A - Legitimate administrative behavior.`
 * **Remediation Recommendation:**
   1. Verify Wazuh Syscollector configuration policy.
   2. Implement an exception (whitelist) for `wazuh-agent.exe` in SIEM detection rules.
