@@ -89,11 +89,11 @@ flowchart TD
 
 This repository adopts a modular **Hub & Spoke** documentation architecture. Click on each playbook card below to read the comprehensive technical case study, step-by-step screenshots, and evidence trails:
 
-| Playbook | Threat Vector & Scope | Technology Stack | Detailed Case Study |
+| Playbook & MITRE ATT&CK | Attack Vector & Telemetry | Technology Stack | Technical Case Study |
 | :--- | :--- | :--- | :---: |
-| **Playbook 1: OS Credential Dumping & AI Triage** | In-memory LSASS extraction via ProcDump (Atomic Red Team T1003.001). Sysmon Event ID 10 (`0x1fffff`), True Positive vs False Positive (`0x1410`) discrimination, and 6-step IR checklist. | Atomic Red Team, Sysmon, Wazuh SIEM, Shuffle SOAR, Jira Cloud, Google Gemini | 👉 **[📖 Read Case Study (14 Screenshots)](docs/playbooks/playbook_1_lsass_dump_defense.md)** |
-| **Playbook 2: Network Reconnaissance Defense** | Aggressive stealth Nmap SYN scanning against Linux server (`192.168.109.161`). Snort NIDS detection, Level 12 SIEM correlation, 1-click authorization, and dynamic IPTables isolation (100% loss proof). | Snort 2.9, Wazuh SIEM, Shuffle SOAR, Jira Cloud, Linux IPTables | 👉 **[📖 Read Case Study (11 Screenshots)](docs/playbooks/playbook_2_nmap_defense.md)** |
-| **Playbook 3: Endpoint Malware Containment (FIM)** | Real-time Trojan drop in Downloads (`lesson29.exe`). Wazuh FIM detection, VirusTotal CTI (30/71 engines), Google Gemini AI triage, and 1-click active response file deletion. | Wazuh Realtime FIM, VirusTotal API, Shuffle SOAR, Jira Cloud, Active Response | 👉 **[📖 Read Case Study (15 Screenshots: Attack vs Benign Gatekeeper)](docs/playbooks/playbook_3_malware_containment_fim.md)** |
+| **Playbook 1: OS Credential Dumping**<br/>`T1003.001` • `TA0006` | • ProcDump LSASS memory dump (Atomic Red Team)<br/>• Sysmon Event ID 10 (`GrantedAccess: 0x1fffff`)<br/>• Wazuh SIEM Rule 100200 (Level 12) | • `Atomic Red Team` / `ProcDump`<br/>• `Sysmon v14` (Event ID 10)<br/>• `Wazuh SIEM` (Rule 100200)<br/>• `Google Gemini 2.5 Flash`<br/>• `Jira Cloud v3` & `Shuffle SOAR` | [View Case Study →](docs/playbooks/playbook_1_lsass_dump_defense.md) |
+| **Playbook 2: Network Reconnaissance**<br/>`T1595.001` • `T1046` | • Stealth Nmap TCP SYN scan against internal host<br/>• Snort NIDS 2.9 detection (Rule `1:1000005:2`)<br/>• Wazuh SIEM Rule 100002 (Level 12) | • `Nmap 7.9x` (Stealth SYN)<br/>• `Snort 2.9 NIDS` (Rule 1000005)<br/>• `Wazuh SIEM` (Rule 100002)<br/>• `VirusTotal API v3` (IP CTI)<br/>• `Linux IPTables` (`firewall-drop.sh`) | [View Case Study →](docs/playbooks/playbook_2_nmap_defense.md) |
+| **Playbook 3: Endpoint Malware (FIM)**<br/>`T1204.002` • `T1105` | • Dropped Trojan executable in Downloads (`lesson29.exe`)<br/>• Wazuh Real-Time FIM detection (Rule 100055, Level 10)<br/>• VirusTotal threat intelligence (30/71 engines flagged) | • `Wazuh Real-Time FIM` (Rule 100055)<br/>• `VirusTotal API v3` (SHA256 lookup)<br/>• `Shuffle Condition Gatekeeper`<br/>• `Google Gemini 2.5 Flash`<br/>• `PowerShell Active Response` (`remove-threat.cmd`) | [View Case Study →](docs/playbooks/playbook_3_malware_containment_fim.md) |
 
 ---
 
