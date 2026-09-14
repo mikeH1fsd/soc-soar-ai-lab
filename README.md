@@ -23,50 +23,21 @@ This project implements an **Enterprise-grade, Human-in-the-Loop (HitL) Security
 ## 🏛️ End-to-End System Architecture
 
 ```mermaid
-flowchart TD
-    subgraph Detection["🔍 Telemetry & Detection Layer"]
-        A1["🖥️ Windows Endpoint<br/>(Sysmon + Wazuh FIM)"]
-        A2["🐧 Ubuntu Linux Server<br/>(Snort IDS + Wazuh Agent)"]
-    end
+flowchart LR
+    %% 1. Telemetry & Sensors
+    WIN["Windows Endpoint<br/>(Sysmon + Wazuh FIM)"] --> WAZUH["Wazuh Manager<br/>(SIEM Correlation)"]
+    UBU["Ubuntu Linux Server<br/>(Snort NIDS)"] --> WAZUH
 
-    subgraph SIEM["🛡️ SIEM Core"]
-        W1["Wazuh Manager (192.168.109.158)<br/>(Correlation Rules 100055, 100002 & 100200)"]
-    end
+    %% 2. SIEM to SOAR
+    WAZUH -->|Alert Webhook| SHUFFLE["Shuffle SOAR<br/>(Automation Engine)"]
 
-    subgraph SOAR["🔀 Automation & Orchestration (Shuffle Cloud)"]
-        S1["Shuffle Webhooks"]
-        S2["Python Normalization & ADF Packaging"]
-        S3["VirusTotal CTI Enrichment"]
-    end
+    %% 3. SOAR to CTI & Jira
+    SHUFFLE <-->|1. CTI Lookup| VT["VirusTotal API<br/>(Threat Intelligence)"]
+    SHUFFLE -->|2. Create Ticket| JIRA["Jira Cloud<br/>(Incident Management)"]
 
-    subgraph AI["🧠 Generative AI Triage"]
-        G1["Google Gemini API<br/>(Zero-Hallucination SOC Prompt)"]
-    end
-
-    subgraph ITSM["🎫 Human-in-the-Loop Interface (Jira Cloud)"]
-        J1["2-Pane Incident Ticket<br/>(Summary + Raw Telemetry)"]
-        J2["Interactive Buttons:<br/>⚡ [1-Click Remediation]<br/>🤖 [On-Demand AI Triage]"]
-        J3["Color-Coded ADF Callout Panel<br/>(Verdict, MITRE, Remediation)"]
-    end
-
-    subgraph Response["⚡ Active Response & Containment"]
-        R1["Wazuh Active Response<br/>(PowerShell File Deletion)"]
-        R2["Wazuh Active Response<br/>(Dynamic IPTables Firewall Drop)"]
-    end
-
-    A1 -->|File Drop Alert| W1
-    A2 -->|Nmap SYN Scan Alert| W1
-    W1 -->|Outbound Webhook| S1
-    S1 --> S3
-    S3 --> S2
-    S2 -->|Atlassian ADF v3| J1
-    J1 --> J2
-    J2 -->|Trigger AI Analysis| G1
-    G1 -->|Structured JSON| J3
-    J2 -->|Authorize Containment| S1
-    S1 -->|REST API PUT| W1
-    W1 -->|remove-threat.cmd| R1
-    W1 -->|!firewall-drop| R2
+    %% 4. Jira to AI & Response
+    JIRA <-->|3. AI Triage| GEMINI["Google Gemini API<br/>(Alert Analysis)"]
+    JIRA -->|4. 1-Click Action| AR["Active Response<br/>(IPTables / File Removal)"]
 ```
 
 ---
