@@ -90,7 +90,7 @@ sequenceDiagram
 > Therefore, mature enterprise SOC doctrine mandates that for **LSASS Process Access incidents**, the automated response is deliberately scoped to:
 > 1. **High-Fidelity Telemetry Capture:** Catching the anomalous `0x1fffff` (`PROCESS_ALL_ACCESS`) mask via Sysmon.
 > 2. **Rapid Incident Contextualization:** Generating enriched 2-Pane tickets via SOAR.
-> 3. **AI Copilot Acceleration:** Validating malicious intent vs. legitimate administration tools in under 3 seconds.
+> 3. **AI Triage Acceleration:** Validating malicious intent vs. legitimate administration tools in under 3 seconds.
 > 4. **Controlled Containment:** Network isolation of the host to sever lateral movement, taking memory snapshots for forensic evidence, and systematically revoking compromised account credentials.
 
 ---

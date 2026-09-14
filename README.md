@@ -3,7 +3,7 @@
 [![Wazuh](https://img.shields.io/badge/SIEM-Wazuh%20v4.x-blue?style=for-the-badge&logo=wazuh)](https://wazuh.com/)
 [![Shuffle SOAR](https://img.shields.io/badge/SOAR-Shuffle%20Cloud-orange?style=for-the-badge)](https://shuffler.io/)
 [![Jira Cloud](https://img.shields.io/badge/ITSM-Jira%20Cloud%20REST%20API%20v3-0052CC?style=for-the-badge&logo=jira)](https://www.atlassian.com/software/jira)
-[![Google Gemini](https://img.shields.io/badge/AI%20Copilot-Google%20Gemini%20Flash-8E75C2?style=for-the-badge&logo=googlegemini)](https://ai.google.dev/)
+[![Google Gemini](https://img.shields.io/badge/AI%20Triage-Google%20Gemini%20Flash-8E75C2?style=for-the-badge&logo=googlegemini)](https://ai.google.dev/)
 [![Snort](https://img.shields.io/badge/NIDS-Snort%202.9-red?style=for-the-badge)](https://www.snort.org/)
 [![MITRE ATT&CK](https://img.shields.io/badge/Framework-MITRE%20ATT%26CK-black?style=for-the-badge)](https://attack.mitre.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
@@ -24,20 +24,20 @@ This project implements an **Enterprise-grade, Human-in-the-Loop (HitL) Security
 
 ```mermaid
 flowchart LR
-    %% 1. Telemetry & Sensors
+    %% Telemetry & Sensors
     WIN["Windows Endpoint<br/>(Sysmon + Wazuh FIM)"] --> WAZUH["Wazuh Manager<br/>(SIEM Correlation)"]
     UBU["Ubuntu Linux Server<br/>(Snort NIDS)"] --> WAZUH
 
-    %% 2. SIEM to SOAR
+    %% SIEM to SOAR
     WAZUH -->|Alert Webhook| SHUFFLE["Shuffle SOAR<br/>(Automation Engine)"]
 
-    %% 3. SOAR to CTI & Jira
-    SHUFFLE <-->|1. CTI Lookup| VT["VirusTotal API<br/>(Threat Intelligence)"]
-    SHUFFLE -->|2. Create Ticket| JIRA["Jira Cloud<br/>(Incident Management)"]
+    %% SOAR to CTI & Jira
+    SHUFFLE <-->|CTI Lookup| VT["VirusTotal API<br/>(Threat Intelligence)"]
+    SHUFFLE -->|Create Ticket| JIRA["Jira Cloud<br/>(Incident Management)"]
 
-    %% 4. Jira to AI & Response
-    JIRA <-->|3. AI Triage| GEMINI["Google Gemini API<br/>(Alert Analysis)"]
-    JIRA -->|4. 1-Click Action| AR["Active Response<br/>(IPTables / File Removal)"]
+    %% Jira to AI & Response
+    JIRA <-->|AI Triage| GEMINI["Google Gemini API<br/>(Alert Analysis)"]
+    JIRA -->|Containment Action| AR["Active Response<br/>(IPTables / File Removal)"]
 ```
 
 ---
@@ -45,14 +45,14 @@ flowchart LR
 ## 🖥️ Lab Environment & Network Schema
 
 | Node / Component | Platform / Deployment | IP Address | Lab Role & Responsibilities |
-| :--- | :--- | :---: | :--- |
+| :--- | :--- | :--- | :--- |
 | **Kali Linux** | Virtual Machine (Attacker) | `192.168.109.165` | Adversary host: Nmap stealth port scanning & threat emulation |
 | **Wazuh Server** | Virtual Machine (SIEM Core) | `192.168.109.158` | Central Wazuh Manager (All-in-One): log correlation, rule engine & response dispatch |
 | **Ubuntu Node** | Virtual Machine (Target / NIDS) | `192.168.109.161` | Target server: Snort 2.9 NIDS (Rule `1000005`) & Wazuh Agent `002` |
 | **Windows 10** | Virtual Machine (Target / Endpoint) | `192.168.109.167` | Victim workstation: Microsoft Sysmon (Event ID 10) & Wazuh Agent `003` (Real-Time FIM) |
 | **Shuffle SOAR** | Cloud SaaS (`shuffler.io`) | Cloud (SaaS) | Security Orchestration, Automation, and Response (SOAR) workflow engine |
 | **Jira Cloud** | Cloud SaaS (`atlassian.net`) | Cloud (SaaS) | Incident Management (ITSM) & Human-in-the-Loop 1-Click containment interface |
-| **Google Gemini & VT** | Cloud REST APIs | Cloud (API) | L3 AI incident triage copilot & VirusTotal Cyber Threat Intelligence (CTI) |
+| **Google Gemini & VT** | Cloud REST APIs | Cloud (API) | Automated alert analysis & VirusTotal Threat Intelligence (CTI) |
 
 ---
 
@@ -73,7 +73,7 @@ This repository adopts a modular **Hub & Spoke** documentation architecture. Cli
 * 🔀 **[Shuffle SOAR Production Workflow Templates](playbooks/shuffle_workflows/README.md):** 6 production-grade JSON workflow files for Shuffle SOAR (LSASS Dump Detection, Nmap Recon Detection, Firewall Drop, FIM Malware Detection, Active Response File Deletion, and Gemini AI SOC Triage).
 * ⚡ **[Custom Active Response Script](scripts/active_response/):** Production Windows malware containment script (`remove-threat.cmd`) invoked on-demand via SOAR 1-Click authorization.
 * ⚙️ **[SIEM & Sensor Configurations](configs/):** Production detection rules for Wazuh Manager (`local_rules.xml`), Snort NIDS (`local.rules`), and Microsoft Sysmon telemetry filters (`sysmonconfig.xml`).
-* 🧠 **[AI SOC Copilot Prompt Engineering](prompts/soc_analyst_l3_prompt.md):** Zero-hallucination L3 SOC Analyst system prompt and structured JSON schema for Google Gemini API integration.
+* 🧠 **[AI SOC Prompt Engineering](prompts/soc_analyst_l3_prompt.md):** Structured system prompt and strict JSON schema for automated Google Gemini alert analysis.
 
 ---
 
