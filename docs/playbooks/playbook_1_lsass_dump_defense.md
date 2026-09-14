@@ -212,6 +212,7 @@ The analyst triggers **`AI_support`** on Ticket SA-77. Google Gemini parses the 
 ## ⚙️ Configuration Files & Code References
 
 * **Wazuh Correlation Rule:** [`configs/wazuh/local_rules.xml`](../../configs/wazuh/local_rules.xml) (`Rule ID: 100200`)
+* **Wazuh Integration Hook:** [`configs/wazuh/ossec_integration.xml`](../../configs/wazuh/ossec_integration.xml)
 * **Sysmon ProcessAccess Filter:** [`configs/sysmon/sysmonconfig.xml`](../../configs/sysmon/sysmonconfig.xml)
 * **AI SOC Prompt System:** [`prompts/soc_analyst_l3_prompt.md`](../../prompts/soc_analyst_l3_prompt.md)
 

@@ -1,10 +1,45 @@
-<!-- Wazuh Integration Block for Shuffle SOAR Webhook -->
-<!-- Add before </ossec_config> in /var/ossec/etc/ossec.conf -->
+<!-- ==============================================================================
+     Wazuh Manager Integration Blocks for Shuffle SOAR Cloud Webhooks
+     File Location on Wazuh Manager: /var/ossec/etc/ossec.conf
+     Place these blocks inside <ossec_config> before the closing </ossec_config> tag.
+     Restart service: sudo systemctl restart wazuh-manager
+============================================================================== -->
 
+<!-- Option A: Dedicated Per-Playbook Webhook Integrations (Recommended for Modular Workflows) -->
+
+<!-- Playbook 1: OS Credential Dumping Detection (Sysmon Event ID 10 -> Rule 100200) -->
 <integration>
   <name>shuffle</name>
-  <hook_url>https://shuffler.io/api/v1/hooks/webhook_YOUR_SHUFFLE_WEBHOOK_ID</hook_url>
-  <!-- Only forward high-fidelity incident rules to avoid SOAR alert fatigue -->
+  <hook_url>https://shuffler.io/api/v1/hooks/webhook_PLAYBOOK1_LSASS_ID</hook_url>
+  <rule_id>100200</rule_id>
+  <alert_format>json</alert_format>
+</integration>
+
+<!-- Playbook 2: Network Reconnaissance & Port Scanning (Snort NIDS -> Rule 100002) -->
+<integration>
+  <name>shuffle</name>
+  <hook_url>https://shuffler.io/api/v1/hooks/webhook_PLAYBOOK2_NMAP_ID</hook_url>
+  <rule_id>100002</rule_id>
+  <alert_format>json</alert_format>
+</integration>
+
+<!-- Playbook 3: Endpoint Malware Containment & Real-Time FIM (Syscheck -> Rule 100055) -->
+<integration>
+  <name>shuffle</name>
+  <hook_url>https://shuffler.io/api/v1/hooks/webhook_PLAYBOOK3_FIM_ID</hook_url>
+  <rule_id>100055</rule_id>
+  <alert_format>json</alert_format>
+</integration>
+
+<!-- ==============================================================================
+     Option B: Consolidated Ingestion Dispatcher (Alternative Single Webhook)
+     Forwards all high-fidelity incident rules to a central triage router workflow.
+============================================================================== -->
+<!--
+<integration>
+  <name>shuffle</name>
+  <hook_url>https://shuffler.io/api/v1/hooks/webhook_CENTRAL_TRIAGE_ID</hook_url>
   <rule_id>100002,100055,100200</rule_id>
   <alert_format>json</alert_format>
 </integration>
+-->

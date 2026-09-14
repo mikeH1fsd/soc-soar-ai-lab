@@ -1,0 +1,37 @@
+<!-- ==============================================================================
+     Wazuh Manager Active Response & Command Configurations
+     File Location on Wazuh Manager: /var/ossec/etc/ossec.conf
+     Place these blocks inside <ossec_config> before the closing </ossec_config> tag.
+     Restart service: sudo systemctl restart wazuh-manager
+     Verification command: sudo /var/ossec/bin/agent_control -L
+============================================================================== -->
+
+<!-- Command 1: Custom Windows Malware File Eradication -->
+<!-- Target: Windows Endpoint (Active Response Script: remove-threat.cmd) -->
+<command>
+  <name>remove-threat</name>
+  <executable>remove-threat.cmd</executable>
+  <timeout_allowed>no</timeout_allowed>
+</command>
+
+<!-- Wazuh 4.x Agent Synchronization Registration:
+     In Wazuh 4.x, custom <command> definitions are not pushed down to Windows agents
+     unless associated with an <active-response> tag in ossec.conf.
+     Because remediation is triggered on-demand via Jira Human-in-the-Loop REST API,
+     we declare a dummy active-response block with a non-existent rule_id (999999).
+     This forces the Manager to register 'remove-threat.cmd' into the agent's ar.conf
+     while preventing automatic trigger before analyst approval. -->
+<active-response>
+  <command>remove-threat</command>
+  <location>local</location>
+  <rules_id>999999</rules_id>
+</active-response>
+
+<!-- Command 2: Host Firewall Isolation (Linux IPTables) -->
+<!-- Target: Ubuntu Server (Active Response Script: firewall-drop.sh) -->
+<!-- Can be invoked dynamically via Wazuh REST API: PUT /active-response with command "!firewall-drop" -->
+<command>
+  <name>firewall-drop</name>
+  <executable>firewall-drop.sh</executable>
+  <timeout_allowed>yes</timeout_allowed>
+</command>

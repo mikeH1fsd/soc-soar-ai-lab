@@ -150,6 +150,8 @@ From the attacker machine (Kali), all network communications are immediately cut
 * **Snort NIDS Rule:** [`configs/snort/local.rules`](../../configs/snort/local.rules)
 * **Wazuh Correlation Rule:** [`configs/wazuh/local_rules.xml`](../../configs/wazuh/local_rules.xml)
 * **Wazuh Integration Hook:** [`configs/wazuh/ossec_integration.xml`](../../configs/wazuh/ossec_integration.xml)
+* **Wazuh Active Response Command:** [`configs/wazuh/ossec_active_response.xml`](../../configs/wazuh/ossec_active_response.xml)
+* **Wazuh Agent Snort Ingestion:** [`configs/wazuh/ossec_agent_inputs.xml`](../../configs/wazuh/ossec_agent_inputs.xml)
 * **Linux Active Response Script:** [`scripts/active_response/firewall-drop.sh`](../../scripts/active_response/firewall-drop.sh)
 * **AI SOC Prompt System:** [`prompts/soc_analyst_l3_prompt.md`](../../prompts/soc_analyst_l3_prompt.md)
 
