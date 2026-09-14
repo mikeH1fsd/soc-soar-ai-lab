@@ -5,6 +5,7 @@
 
   <!-- ============================================================ -->
   <!-- PLAYBOOK 1: OS CREDENTIAL DUMPING (LSASS PROCESS ACCESS)    -->
+  <!-- Telemetry: Sysmon Event ID 10 (TargetImage: lsass.exe)       -->
   <!-- ============================================================ -->
   <rule id="100200" level="12">
     <if_group>sysmon_eid10_detections|sysmon</if_group>
@@ -19,28 +20,37 @@
     </mitre>
   </rule>
 
-  <!-- Optional FIM Rule for Malicious Drops -->
-  <rule id="100055" level="12">
-    <if_sid>550,554</if_sid>
-    <match>C:\Users\Public\Downloads</match>
-    <description>SOC ALERT: Potential Malware Dropped in Public Downloads Directory</description>
-    <mitre>
-      <id>T1204.002</id>
-      <tactic>TA0002</tactic>
-    </mitre>
-  </rule>
-
   <!-- ============================================================ -->
   <!-- PLAYBOOK 2: NETWORK RECONNAISSANCE DEFENSE (NMAP SYN SCAN)  -->
+  <!-- Telemetry: Snort Alert SID 1:1000005:2 (Decoder: snort)      -->
   <!-- ============================================================ -->
   <rule id="100002" level="12">
-    <if_group>ids</if_group>
+    <if_group>snort|ids</if_group>
     <match>Nmap SYN Scan Detected</match>
-    <description>CRITICAL ALERT: Reconnaissance - Nmap SYN Port Scan Detected by Snort IDS</description>
+    <description>CRITICAL ALERT: Reconnaissance - Nmap SYN Port Scan Detected.</description>
+    <group>local,snort,custom,</group>
     <mitre>
       <id>T1046</id>
       <id>T1595.002</id>
       <tactic>TA0043</tactic>
+    </mitre>
+  </rule>
+
+  <!-- ============================================================ -->
+  <!-- PLAYBOOK 3: ENDPOINT MALWARE CONTAINMENT (REAL-TIME FIM)     -->
+  <!-- Telemetry: Wazuh syscheck_new_entry (FIM File Creation)      -->
+  <!-- ============================================================ -->
+  <rule id="100055" level="10">
+    <if_sid>554,550</if_sid>
+    <field name="syscheck.path">\.(exe|bat|ps1|vbs|dll)$</field>
+    <description>Suspicious executable or script dropped in monitored directory: $(syscheck.path)</description>
+    <group>syscheck,custom_fim,malware,</group>
+    <mitre>
+      <id>T1204.002</id>
+      <id>T1105</id>
+      <id>T1059</id>
+      <tactic>TA0002</tactic>
+      <tactic>TA0011</tactic>
     </mitre>
   </rule>
 
